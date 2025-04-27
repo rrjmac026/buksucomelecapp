@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">BukSU-Comelec2025</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_candidates">Manage Candidates</string>
+    <string name="nav_positions">Manage Positions</string>
+    <string name="nav_voters">Manage Voters</string>
+    <string name="nav_results">Election Results</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_logout">Logout</string>
+    <string name="nav_header_title">BukSU-Comelec2025</string>
+    <string name="nav_header_subtitle">Admin Dashboard</string>
+    <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+    <string name="web_client_id">283911684117-rolv87gsd5qeiavvalv8d29stjer8tv6.apps.googleusercontent.com</string>
+    <string name="nav_vote">Vote</string>
+    <string name="nav_profile">My Profile</string>
+    <string name="voter_header_title">BukSU-Comelec2025</string>
+    <string name="voter_header_subtitle">Voter Dashboard</string>
+</resources>

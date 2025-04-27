@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="buksu_purple">#380041</color>
+    <color name="buksu_purple_light">#612069</color>
+    <color name="buksu_purple_dark">#1F0024</color>
+    <color name="buksu_gold">#f9b40f</color>
+    <color name="buksu_gold_light">#ffde51</color>
+    <color name="buksu_gold_dark">#c68400</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#121212</color>
+    <color name="card_background_light">#FFFFFF</color>
+    <color name="card_background_dark">#272727</color>
+    <color name="text_color_light">#000000</color>
+    <color name="text_color_dark">#FFFFFF</color>
+    <color name="dark_background">#121212</color>
+    <color name="dark_surface">#1E1E1E</color>
+    <color name="dark_card">#2D2D2D</color>
+    <color name="dark_primary">#4A0054</color>
+    <color name="dark_gold">#FFD54F</color>
+    <color name="dark_text_primary">#FFFFFF</color>
+    <color name="dark_text_secondary">#B3FFFFFF</color>
+</resources>

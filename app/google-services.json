@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "283911684117",
+    "project_id": "buksucomelecapp-7a970",
+    "storage_bucket": "buksucomelecapp-7a970.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:283911684117:android:909e5a92d656c537068e1c",
+        "android_client_info": {
+          "package_name": "com.example.appdevfinal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "283911684117-rolv87gsd5qeiavvalv8d29stjer8tv6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.appdevfinal",
+            "certificate_hash": "bc56b8b6864f6a68129abc52ff9b878ef16b1a2a"
+          }
+        },
+        {
+          "client_id": "283911684117-75tdhqo629seckat5q6i0u943ek93dko.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsMaGZlhibmRsUKZODps_yUTFHZeCI_uQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "283911684117-75tdhqo629seckat5q6i0u943ek93dko.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
