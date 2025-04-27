@@ -10,6 +10,13 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.example.appdevfinal.fragments.DashboardFragment;
+import com.example.appdevfinal.fragments.CandidatesFragment;
+import com.example.appdevfinal.fragments.SettingsFragment;
+import com.example.appdevfinal.fragments.VoterManagementFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -17,6 +24,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
     private static final String FRAGMENT_TAG_DASHBOARD = "dashboard";
     private static final String FRAGMENT_TAG_CANDIDATES = "candidates";
     private static final String FRAGMENT_TAG_SETTINGS = "settings";
+    private static final String FRAGMENT_TAG_VOTERS = "voters";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +69,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             loadFragment(new CandidatesFragment(), FRAGMENT_TAG_CANDIDATES);
         } else if (id == R.id.nav_settings) {
             loadFragment(new SettingsFragment(), FRAGMENT_TAG_SETTINGS);
+        } else if (id == R.id.nav_voters) {
+            loadFragment(new VoterManagementFragment(), FRAGMENT_TAG_VOTERS);
         } else if (id == R.id.nav_logout) {
             handleLogout();
             return true;

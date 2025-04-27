@@ -3,16 +3,17 @@ package com.example.appdevfinal.models;
 public class Voter {
     private String id;
     private String name;
+    private String email;
     private String studentId;
-    private String course;
     private boolean hasVoted;
 
-    public Voter() {} // Required for Firestore
+    public Voter() {} // Required for Firebase
 
-    public Voter(String name, String studentId, String course) {
+    public Voter(String id, String name, String email, String studentId) {
+        this.id = id;
         this.name = name;
+        this.email = email;
         this.studentId = studentId;
-        this.course = course;
         this.hasVoted = false;
     }
 
@@ -21,10 +22,10 @@ public class Voter {
     public void setId(String id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
-    public String getCourse() { return course; }
-    public void setCourse(String course) { this.course = course; }
-    public boolean getHasVoted() { return hasVoted; }
+    public boolean hasVoted() { return hasVoted; }
     public void setHasVoted(boolean hasVoted) { this.hasVoted = hasVoted; }
 }
