@@ -1,16 +1,26 @@
 package com.example.appdevfinal;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
+import android.content.res.Configuration;
 import com.example.appdevfinal.services.AuthService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -19,10 +29,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.firestore.FirebaseFirestore;
 import android.util.Base64;
 import java.security.MessageDigest;
 import java.util.Date;
@@ -34,56 +42,46 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
-    private EditText emailInput, passwordInput;
+    private EditText etEmail, etPassword;
     private AuthService authService;
     private ProgressBar loadingIndicator;
-
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply theme before super.onCreate and setContentView
+        applyTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        authService = new AuthService(this);
+        
+        // Initialize views
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
         loadingIndicator = findViewById(R.id.loadingIndicator);
+        
+        // Initialize Firebase
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
-        // Check cached role first
-        String cachedRole = authService.getCachedUserRole();
-        if (cachedRole != null) {
-            redirectBasedOnRole(cachedRole);
-            return;
+        // Setup toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        mAuth = FirebaseAuth.getInstance();
-        emailInput = findViewById(R.id.emailInput);
-        passwordInput = findViewById(R.id.passwordInput);
+        findViewById(R.id.btnLogin).setOnClickListener(v -> loginUser());
+        findViewById(R.id.btnGoogleLogin).setOnClickListener(v -> signInWithGoogle());
+    }
 
-        // Verify SHA-1 fingerprint
-        try {
-            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
-            for (Signature signature : packageInfo.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA1");
-                md.update(signature.toByteArray());
-                String sha1 = bytesToHex(md.digest()).toUpperCase();
-                Log.d(TAG, "SHA1: " + sha1);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error checking signature", e);
-        }
-
-        // Configure Google Sign In with web client ID
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("283911684117-rolv87gsd5qeiavvalv8d29stjer8tv6.apps.googleusercontent.com")
-                .requestEmail()
-                .requestProfile()
-                .requestId()
-                .build();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-        // Setup click listeners
-        findViewById(R.id.loginButton).setOnClickListener(v -> loginUser());
-        findViewById(R.id.googleSignInButton).setOnClickListener(v -> signInWithGoogle());
-        findViewById(R.id.registerButton).setOnClickListener(v -> startActivity(new Intent(this, RegisterActivity.class)));
+    private void applyTheme() {
+        SharedPreferences prefs = getSharedPreferences("theme_prefs", MODE_PRIVATE);
+        boolean isDarkMode = prefs.getBoolean("is_dark_mode", false);
+        int defaultMode = isDarkMode ? 
+            AppCompatDelegate.MODE_NIGHT_YES : 
+            AppCompatDelegate.MODE_NIGHT_NO;
+        AppCompatDelegate.setDefaultNightMode(defaultMode);
     }
 
     private void signInWithGoogle() {
@@ -145,48 +143,46 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
-        String email = emailInput.getText().toString().trim();
-        String password = passwordInput.getText().toString().trim();
+        if (loadingIndicator != null) {
+            loadingIndicator.setVisibility(View.VISIBLE);
+        }
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Proceed directly with Firebase authentication
-        proceedWithLogin(email, password);
-    }
-
-    private void proceedWithLogin(String email, String password) {
-        loadingIndicator.setVisibility(View.VISIBLE);
-        mAuth.signInWithEmailAndPassword(email, password)
+        auth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener(authResult -> {
                 String userId = authResult.getUser().getUid();
                 
-                // Check user role in Firestore
-                FirebaseFirestore.getInstance()
-                    .collection("users")
+                db.collection("users")
                     .document(userId)
                     .get()
                     .addOnSuccessListener(document -> {
                         loadingIndicator.setVisibility(View.GONE);
                         if (document.exists()) {
                             String role = document.getString("role");
+                            Intent intent;
                             if ("admin".equals(role)) {
-                                startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+                                intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
                             } else {
-                                startActivity(new Intent(LoginActivity.this, VoterDashboardActivity.class));
+                                intent = new Intent(LoginActivity.this, VoterDashboardActivity.class);
                             }
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
                             finish();
                         } else {
                             Toast.makeText(LoginActivity.this, "User profile not found", Toast.LENGTH_SHORT).show();
-                            mAuth.signOut();
+                            auth.signOut();
                         }
                     })
                     .addOnFailureListener(e -> {
                         loadingIndicator.setVisibility(View.GONE);
                         Toast.makeText(LoginActivity.this, "Error checking role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        mAuth.signOut();
+                        auth.signOut();
                     });
             })
             .addOnFailureListener(e -> {
@@ -201,5 +197,35 @@ public class LoginActivity extends AppCompatActivity {
             builder.append(String.format("%02X", b));
         }
         return builder.toString();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.login_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_toggle_theme) {
+            boolean isDarkMode = 
+                (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
+            
+            // Toggle theme
+            int newMode = isDarkMode ? 
+                AppCompatDelegate.MODE_NIGHT_NO : 
+                AppCompatDelegate.MODE_NIGHT_YES;
+            AppCompatDelegate.setDefaultNightMode(newMode);
+            
+            // Save preference
+            getSharedPreferences("theme_prefs", MODE_PRIVATE)
+                .edit()
+                .putBoolean("is_dark_mode", !isDarkMode)
+                .apply();
+                
+            recreate();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

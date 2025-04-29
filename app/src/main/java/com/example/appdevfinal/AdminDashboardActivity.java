@@ -1,6 +1,7 @@
 package com.example.appdevfinal;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
@@ -58,6 +60,10 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.nav_logout) {
+            handleLogout();
+            return true;
+        }
         int id = item.getItemId();
         
         // Clear backstack before adding new fragment
@@ -71,9 +77,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             loadFragment(new SettingsFragment(), FRAGMENT_TAG_SETTINGS);
         } else if (id == R.id.nav_voters) {
             loadFragment(new VoterManagementFragment(), FRAGMENT_TAG_VOTERS);
-        } else if (id == R.id.nav_logout) {
-            handleLogout();
-            return true;
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -84,7 +87,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
     private void handleLogout() {
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
@@ -123,10 +126,23 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_logout) {
+        if (item.getItemId() == R.id.action_toggle_theme) {
+            toggleTheme();
+            return true;
+        } else if (item.getItemId() == R.id.action_logout) {
             handleLogout();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleTheme() {
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        AppCompatDelegate.setDefaultNightMode(
+            currentNightMode == Configuration.UI_MODE_NIGHT_YES
+                ? AppCompatDelegate.MODE_NIGHT_NO
+                : AppCompatDelegate.MODE_NIGHT_YES
+        );
+        recreate();
     }
 }

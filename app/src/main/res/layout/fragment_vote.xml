@@ -11,10 +11,11 @@
         android:text="Cast Your Vote"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:textColor="@color/buksu_deep_purple"
         android:layout_marginBottom="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewPositions"
+        android:id="@+id/candidatesRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
@@ -24,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Submit Vote"
-        android:enabled="false"
-        android:layout_marginTop="16dp"/>
-
+        android:textColor="@color/buksu_gold"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/buksu_deep_purple"/>
 </LinearLayout>

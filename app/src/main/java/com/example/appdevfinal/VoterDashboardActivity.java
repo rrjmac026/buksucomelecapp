@@ -8,22 +8,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import com.example.appdevfinal.fragments.VoteFragment;
+import com.example.appdevfinal.fragments.VoterDashboardFragment;
 import com.example.appdevfinal.fragments.VoterProfileFragment;
 import com.example.appdevfinal.fragments.VoterResultsFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class VoterDashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private DrawerLayout drawerLayout;
-    private static final String FRAGMENT_TAG_VOTE = "vote";
-    private static final String FRAGMENT_TAG_PROFILE = "profile";
-    private static final String FRAGMENT_TAG_RESULTS = "results";
-    private FirebaseAuth mAuth;
+public class VoterDashboardActivity extends AppCompatActivity 
+        implements NavigationView.OnNavigationItemSelectedListener {
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,74 +31,78 @@ public class VoterDashboardActivity extends AppCompatActivity implements Navigat
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Voter Dashboard");
+        }
 
-        drawerLayout = findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-            this, drawerLayout, toolbar,
+            this, drawer, toolbar,
             R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        );
-        drawerLayout.addDrawerListener(toggle);
+            R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Load default fragment
+        // Set initial fragment
         if (savedInstanceState == null) {
-            loadFragment(new VoteFragment(), FRAGMENT_TAG_VOTE);
-            navigationView.setCheckedItem(R.id.nav_vote);
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new VoterDashboardFragment())
+                .commit();
+            navigationView.setCheckedItem(R.id.nav_voter_dashboard);
         }
-        mAuth = FirebaseAuth.getInstance();
-    }
-
-    private void loadFragment(Fragment fragment, String tag) {
-        getSupportFragmentManager()
-            .beginTransaction()
-            .replace(R.id.nav_host_fragment_content_voter, fragment, tag)
-            .commit();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.nav_logout) {
-            handleLogout();
-            return true;
-        }
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    private void handleLogout() {
-        FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.voter_menu, menu);
+        getMenuInflater().inflate(R.menu.voter_dashboard_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_logout) {
-            handleLogout();
+        if (item.getItemId() == R.id.action_toggle_theme) {
+            int nightModeFlags = getResources().getConfiguration().uiMode & 
+                               android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+            if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            }
+            // Save theme preference
+            getSharedPreferences("theme_prefs", MODE_PRIVATE)
+                .edit()
+                .putBoolean("is_dark_mode", 
+                    nightModeFlags != android.content.res.Configuration.UI_MODE_NIGHT_YES)
+                .apply();
+            recreate();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        
+        if (id == R.id.nav_voter_dashboard) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new VoterDashboardFragment())
+                .commit();
+        } else if (id == R.id.nav_vote) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new VoteFragment())
+                .commit();
+        } else if (id == R.id.nav_logout) {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

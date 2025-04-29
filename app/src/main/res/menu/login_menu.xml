@@ -5,10 +5,5 @@
         android:id="@+id/action_toggle_theme"
         android:icon="@drawable/ic_brightness"
         android:title="Toggle Theme"
-        app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/action_logout"
-        android:title="Logout"
-        android:orderInCategory="100"
-        app:showAsAction="never"/>
+        app:showAsAction="always"/>
 </menu>

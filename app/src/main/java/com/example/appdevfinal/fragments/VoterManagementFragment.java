@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevfinal.R;
@@ -26,9 +27,10 @@ public class VoterManagementFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         voterRecyclerView = view.findViewById(R.id.voterRecyclerView);
         
-        // Initialize RecyclerView
-        voterAdapter = new VoterAdapter(new ArrayList<>());
+        // Initialize RecyclerView with decoration
         voterRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        voterRecyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
+        voterAdapter = new VoterAdapter(new ArrayList<>());
         voterRecyclerView.setAdapter(voterAdapter);
         
         loadRegisteredVoters();

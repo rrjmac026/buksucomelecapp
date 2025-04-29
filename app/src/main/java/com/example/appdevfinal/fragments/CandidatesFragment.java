@@ -22,6 +22,7 @@ import com.example.appdevfinal.models.Candidate;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
     private FirebaseFirestore db;
     private TextInputEditText searchView;
     private Spinner spinnerSort;
+    private ListenerRegistration candidatesListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,12 +55,49 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
 
         setupSearchView();
         setupSortSpinner();
-        loadCandidates();
+        attachCandidatesListener();
 
         FloatingActionButton fab = view.findViewById(R.id.fabAddCandidate);
         fab.setOnClickListener(v -> showAddDialog());
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        attachCandidatesListener();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (candidatesListener != null) {
+            candidatesListener.remove();
+        }
+    }
+
+    private void attachCandidatesListener() {
+        candidatesListener = db.collection("candidates")
+            .addSnapshotListener((snapshots, e) -> {
+                if (e != null) {
+                    return;
+                }
+
+                candidates.clear();
+                allCandidates.clear();
+                
+                for (QueryDocumentSnapshot doc : snapshots) {
+                    Candidate candidate = doc.toObject(Candidate.class);
+                    if (candidate != null) {
+                        candidate.setId(doc.getId());
+                        candidates.add(candidate);
+                        allCandidates.add(candidate);
+                    }
+                }
+                
+                adapter.notifyDataSetChanged();
+            });
     }
 
     private void setupSearchView() {
@@ -132,41 +171,6 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
         adapter.notifyDataSetChanged();
     }
 
-    private void loadCandidates() {
-        if (db == null) return;
-
-        db.collection("candidates")
-            .addSnapshotListener((value, error) -> {
-                if (error != null) {
-                    Toast.makeText(getContext(), "Error loading candidates: " + error.getMessage(), 
-                        Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (value != null) {
-                    allCandidates = new ArrayList<>();
-                    candidates.clear();
-                    
-                    for (QueryDocumentSnapshot doc : value) {
-                        Candidate candidate = doc.toObject(Candidate.class);
-                        if (candidate != null) {
-                            candidate.setId(doc.getId());
-                            allCandidates.add(candidate);
-                            candidates.add(candidate);
-                        }
-                    }
-                    
-                    if (spinnerSort != null) {
-                        sortCandidates(spinnerSort.getSelectedItemPosition());
-                    }
-                    
-                    if (adapter != null) {
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            });
-    }
-
     private void showAddDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_candidate, null);
         EditText editName = dialogView.findViewById(R.id.editName);
@@ -193,8 +197,10 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
     private void addCandidate(Candidate candidate) {
         db.collection("candidates")
             .add(candidate)
-            .addOnSuccessListener(documentReference -> 
-                Toast.makeText(getContext(), "Candidate added successfully", Toast.LENGTH_SHORT).show())
+            .addOnSuccessListener(documentReference -> {
+                Toast.makeText(getContext(), "Candidate added successfully", Toast.LENGTH_SHORT).show();
+                // No need to reload - listener will handle it
+            })
             .addOnFailureListener(e -> 
                 Toast.makeText(getContext(), "Error adding candidate", Toast.LENGTH_SHORT).show());
     }
@@ -202,8 +208,10 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
     private void updateCandidate(Candidate candidate) {
         db.collection("candidates").document(candidate.getId())
             .set(candidate)
-            .addOnSuccessListener(aVoid -> 
-                Toast.makeText(getContext(), "Candidate updated successfully", Toast.LENGTH_SHORT).show())
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(getContext(), "Candidate updated successfully", Toast.LENGTH_SHORT).show();
+                // No need to reload - listener will handle it
+            })
             .addOnFailureListener(e -> 
                 Toast.makeText(getContext(), "Error updating candidate", Toast.LENGTH_SHORT).show());
     }
@@ -211,25 +219,22 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
     private void deleteCandidate(Candidate candidate) {
         db.collection("candidates").document(candidate.getId())
             .delete()
-            .addOnSuccessListener(aVoid -> 
-                Toast.makeText(getContext(), "Candidate deleted successfully", Toast.LENGTH_SHORT).show())
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(getContext(), "Candidate deleted successfully", Toast.LENGTH_SHORT).show();
+                // No need to reload - listener will handle it
+            })
             .addOnFailureListener(e -> 
                 Toast.makeText(getContext(), "Error deleting candidate", Toast.LENGTH_SHORT).show());
     }
 
     @Override
-    public void onEditClick(Candidate candidate) {
+    public void onCandidateEdit(Candidate candidate) {
         showEditDialog(candidate);
     }
 
     @Override
-    public void onDeleteClick(Candidate candidate) {
-        new AlertDialog.Builder(getContext())
-                .setTitle("Delete Candidate")
-                .setMessage("Are you sure you want to delete this candidate?")
-                .setPositiveButton("Yes", (dialog, which) -> deleteCandidate(candidate))
-                .setNegativeButton("No", null)
-                .show();
+    public void onCandidateDelete(Candidate candidate) {
+        deleteCandidate(candidate);
     }
 
     private void showEditDialog(Candidate candidate) {
