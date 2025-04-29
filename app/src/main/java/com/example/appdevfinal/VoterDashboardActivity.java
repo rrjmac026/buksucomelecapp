@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import com.example.appdevfinal.fragments.RankingsFragment;
 import com.example.appdevfinal.fragments.VoteFragment;
 import com.example.appdevfinal.fragments.VoterDashboardFragment;
 import com.example.appdevfinal.fragments.VoterProfileFragment;

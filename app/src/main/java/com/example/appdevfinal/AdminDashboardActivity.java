@@ -11,12 +11,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.appdevfinal.fragments.AdminDashboardFragment;
 import com.example.appdevfinal.fragments.CandidatesFragment;
+import com.example.appdevfinal.fragments.RankingsFragment;
 import com.example.appdevfinal.fragments.SettingsFragment;
 import com.example.appdevfinal.fragments.VoterManagementFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class AdminDashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class AdminDashboardActivity extends AppCompatActivity 
+        implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout drawer;
     
     // Fragment tags
@@ -52,27 +54,29 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_dashboard:
-                getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new AdminDashboardFragment(), FRAGMENT_TAG_DASHBOARD)
-                    .commit();
-                break;
-            case R.id.nav_candidates:
-                getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new CandidatesFragment(), FRAGMENT_TAG_CANDIDATES)
-                    .commit();
-                break;
-            case R.id.nav_voter_management:
-                getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new VoterManagementFragment(), FRAGMENT_TAG_VOTERS)
-                    .commit();
-                break;
-            case R.id.nav_logout:
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
-                return true;
+        int id = item.getItemId();
+        
+        if (id == R.id.nav_dashboard) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new AdminDashboardFragment())
+                .commit();
+        } else if (id == R.id.nav_candidates) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new CandidatesFragment())
+                .commit();
+        } else if (id == R.id.nav_rankings) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new RankingsFragment())
+                .commit();
+        } else if (id == R.id.nav_voter_management) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new VoterManagementFragment())
+                .commit();
+        } else if (id == R.id.nav_logout) {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return true;
         }
 
         drawer.closeDrawer(GravityCompat.START);
