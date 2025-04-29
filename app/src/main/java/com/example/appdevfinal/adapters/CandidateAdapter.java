@@ -3,100 +3,81 @@ package com.example.appdevfinal.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioButton;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevfinal.R;
 import com.example.appdevfinal.models.Candidate;
 import java.util.List;
-import java.util.Map;
 
-public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.ViewHolder> {
-    private List<?> items; // Can be List<Candidate> or List<Map<String, Object>>
-    private int selectedPosition = -1;
-    private boolean isVotingMode;
+public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.CandidateViewHolder> {
+    private List<Candidate> candidates;
     private OnCandidateClickListener listener;
 
     public interface OnCandidateClickListener {
-        void onCandidateEdit(Candidate candidate);
-        void onCandidateDelete(Candidate candidate);
+        void onCandidateClick(Candidate candidate);
+        void onEditClick(Candidate candidate);
+        void onDeleteClick(Candidate candidate);
     }
 
-    public CandidateAdapter(List<?> items, boolean isVotingMode) {
-        this.items = items;
-        this.isVotingMode = isVotingMode;
-    }
-
-    public CandidateAdapter(List<Candidate> items, OnCandidateClickListener listener) {
-        this.items = items;
+    public CandidateAdapter(List<Candidate> candidates, OnCandidateClickListener listener) {
+        this.candidates = candidates;
         this.listener = listener;
-        this.isVotingMode = false;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        int layout = isVotingMode ? R.layout.item_candidate : R.layout.item_candidate_manage;
-        View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
-        return new ViewHolder(view);
+    public CandidateViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_candidate, parent, false);
+        return new CandidateViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if (isVotingMode) {
-            Map<String, Object> candidate = (Map<String, Object>) items.get(position);
-            holder.candidateName.setText((String) candidate.get("name"));
-            holder.candidateParty.setText((String) candidate.get("partyList"));
-            if (holder.radioButton != null) {
-                holder.radioButton.setChecked(position == selectedPosition);
-                holder.itemView.setOnClickListener(v -> {
-                    selectedPosition = holder.getAdapterPosition();
-                    notifyDataSetChanged();
-                });
+    public void onBindViewHolder(@NonNull CandidateViewHolder holder, int position) {
+        Candidate candidate = candidates.get(position);
+        holder.nameTextView.setText(candidate.getName());
+        holder.positionTextView.setText(candidate.getPosition());
+        holder.partyTextView.setText(candidate.getPartyList());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onCandidateClick(candidate);
             }
-        } else {
-            Candidate candidate = (Candidate) items.get(position);
-            holder.candidateName.setText(candidate.getName());
-            holder.candidateParty.setText(candidate.getPartyList());
-            holder.itemView.setOnClickListener(v -> {
-                if (listener != null) listener.onCandidateEdit(candidate);
-            });
-            if (holder.deleteButton != null) {
-                holder.deleteButton.setOnClickListener(v -> {
-                    if (listener != null) listener.onCandidateDelete(candidate);
-                });
+        });
+
+        holder.editButton.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onEditClick(candidate);
             }
-        }
+        });
+
+        holder.deleteButton.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onDeleteClick(candidate);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return candidates.size();
     }
 
-    public Object getSelectedItem() {
-        return selectedPosition != -1 ? items.get(selectedPosition) : null;
-    }
+    static class CandidateViewHolder extends RecyclerView.ViewHolder {
+        TextView nameTextView;
+        TextView positionTextView;
+        TextView partyTextView;
+        ImageButton editButton;
+        ImageButton deleteButton;
 
-    public Map<String, Object> getSelectedCandidate() {
-        if (selectedPosition != -1 && isVotingMode) {
-            return (Map<String, Object>) items.get(selectedPosition);
-        }
-        return null;
-    }
-
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView candidateName, candidateParty;
-        RadioButton radioButton;
-        View deleteButton;
-
-        ViewHolder(View view) {
-            super(view);
-            candidateName = view.findViewById(R.id.candidateName);
-            candidateParty = view.findViewById(R.id.candidateParty);
-            radioButton = view.findViewById(R.id.radioButton);
-            deleteButton = view.findViewById(R.id.deleteButton);
+        public CandidateViewHolder(@NonNull View itemView) {
+            super(itemView);
+            nameTextView = itemView.findViewById(R.id.candidateName);
+            positionTextView = itemView.findViewById(R.id.candidatePosition);
+            partyTextView = itemView.findViewById(R.id.candidateParty);
+            editButton = itemView.findViewById(R.id.editButton);
+            deleteButton = itemView.findViewById(R.id.deleteButton);
         }
     }
 }

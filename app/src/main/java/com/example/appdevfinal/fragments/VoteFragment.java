@@ -13,9 +13,16 @@ import androidx.fragment.app.Fragment;
 import com.example.appdevfinal.R;
 import com.example.appdevfinal.models.Candidate;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class VoteFragment extends Fragment {
     private RadioGroup presidentGroup, vpGroup;
@@ -144,8 +151,62 @@ public class VoteFragment extends Fragment {
     }
 
     private void submitVote() {
-        // TODO: Implement vote submission to Firebase
-        showSuccess("Vote submitted successfully!");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String userId = auth.getCurrentUser().getUid();
+        
+        // Get selected candidates
+        RadioButton selectedPresident = presidentGroup.findViewById(presidentGroup.getCheckedRadioButtonId());
+        RadioButton selectedVP = vpGroup.findViewById(vpGroup.getCheckedRadioButtonId());
+        List<String> selectedSenators = new ArrayList<>();
+        
+        for (int i = 0; i < senatorsGroup.getChildCount(); i++) {
+            View child = senatorsGroup.getChildAt(i);
+            if (child instanceof CheckBox && ((CheckBox) child).isChecked()) {
+                selectedSenators.add(((CheckBox) child).getText().toString());
+            }
+        }
+
+        // Create vote document
+        Map<String, Object> vote = new HashMap<>();
+        vote.put("voterId", userId);
+        vote.put("president", selectedPresident.getText().toString());
+        vote.put("vicePresident", selectedVP.getText().toString());
+        vote.put("senators", selectedSenators);
+        vote.put("timestamp", new Date());
+
+        // Submit vote and update voter status
+        db.collection("votes").add(vote)
+            .addOnSuccessListener(documentReference -> {
+                // Update voter status
+                db.collection("users").document(userId)
+                    .update("hasVoted", true)
+                    .addOnSuccessListener(aVoid -> {
+                        // Update candidate vote counts
+                        incrementCandidateVotes(selectedPresident.getText().toString());
+                        incrementCandidateVotes(selectedVP.getText().toString());
+                        for (String senator : selectedSenators) {
+                            incrementCandidateVotes(senator);
+                        }
+                        showSuccess("Vote submitted successfully!");
+                        clearSelections();
+                    })
+                    .addOnFailureListener(e -> showError("Error updating voter status: " + e.getMessage()));
+            })
+            .addOnFailureListener(e -> showError("Error submitting vote: " + e.getMessage()));
+    }
+
+    private void incrementCandidateVotes(String candidateName) {
+        db.collection("candidates")
+            .whereEqualTo("name", candidateName)
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    doc.getReference().update("voteCount", FieldValue.increment(1));
+                }
+            });
+    }
+
+    private void clearSelections() {
         // Clear selections
         presidentGroup.clearCheck();
         vpGroup.clearCheck();

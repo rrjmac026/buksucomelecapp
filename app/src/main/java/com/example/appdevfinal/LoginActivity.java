@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -73,6 +74,10 @@ public class LoginActivity extends AppCompatActivity {
 
         findViewById(R.id.btnLogin).setOnClickListener(v -> loginUser());
         findViewById(R.id.btnGoogleLogin).setOnClickListener(v -> signInWithGoogle());
+        TextView tvSignUp = findViewById(R.id.tvSignUp);
+        tvSignUp.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        });
     }
 
     private void applyTheme() {

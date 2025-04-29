@@ -21,11 +21,15 @@ import com.example.appdevfinal.adapters.CandidateAdapter;
 import com.example.appdevfinal.models.Candidate;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CandidatesFragment extends Fragment implements CandidateAdapter.OnCandidateClickListener {
     private RecyclerView recyclerView;
@@ -171,82 +175,94 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
         adapter.notifyDataSetChanged();
     }
 
+    private void setupPositionDropdown(MaterialAutoCompleteTextView positionDropdown) {
+        String[] positions = new String[]{"President", "Vice President", "Senator"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+            R.layout.item_dropdown_position, positions);
+        positionDropdown.setAdapter(adapter);
+    }
+
     private void showAddDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_candidate, null);
-        EditText editName = dialogView.findViewById(R.id.editName);
-        EditText editPosition = dialogView.findViewById(R.id.editPosition);
-        EditText editPartyList = dialogView.findViewById(R.id.editPartyList);
-        EditText editPlatform = dialogView.findViewById(R.id.editPlatform);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_candidate, null);
 
-        new AlertDialog.Builder(getContext())
+        EditText nameInput = view.findViewById(R.id.editName);
+        MaterialAutoCompleteTextView positionDropdown = view.findViewById(R.id.editPosition);
+        EditText partyListInput = view.findViewById(R.id.editPartyList);
+        EditText platformInput = view.findViewById(R.id.editPlatform);
+        setupPositionDropdown(positionDropdown);
+
+        builder.setView(view)
             .setTitle("Add New Candidate")
-            .setView(dialogView)
             .setPositiveButton("Add", (dialog, which) -> {
-                Candidate candidate = new Candidate(
-                    editName.getText().toString(),
-                    editPosition.getText().toString(),
-                    editPartyList.getText().toString(),
-                    editPlatform.getText().toString()
-                );
-                addCandidate(candidate);
+                String name = nameInput.getText().toString().trim();
+                String position = positionDropdown.getText().toString();
+                String partyList = partyListInput.getText().toString().trim();
+                String platform = platformInput.getText().toString().trim();
+
+                if (validateInput(name, position, partyList, platform)) {
+                    Map<String, Object> candidateData = new HashMap<>();
+                    candidateData.put("name", name);
+                    candidateData.put("position", position);
+                    candidateData.put("partyList", partyList);
+                    candidateData.put("platform", platform);
+
+                    db.collection("candidates")
+                        .add(candidateData)
+                        .addOnSuccessListener(documentReference -> {
+                            showSuccess("Candidate added successfully");
+                            loadCandidates();
+                        })
+                        .addOnFailureListener(e -> showError("Failed to add candidate: " + e.getMessage()));
+                }
             })
-            .setNegativeButton("Cancel", null)
-            .show();
+            .setNegativeButton("Cancel", null);
+
+        builder.create().show();
     }
 
-    private void addCandidate(Candidate candidate) {
-        db.collection("candidates")
-            .add(candidate)
-            .addOnSuccessListener(documentReference -> {
-                Toast.makeText(getContext(), "Candidate added successfully", Toast.LENGTH_SHORT).show();
-                // No need to reload - listener will handle it
-            })
-            .addOnFailureListener(e -> 
-                Toast.makeText(getContext(), "Error adding candidate", Toast.LENGTH_SHORT).show());
+    private boolean validateInput(String name, String position, String partyList, String platform) {
+        if (name.isEmpty() || position.isEmpty() || partyList.isEmpty() || platform.isEmpty()) {
+            showError("All fields must be filled");
+            return false;
+        }
+        return true;
     }
 
-    private void updateCandidate(Candidate candidate) {
-        db.collection("candidates").document(candidate.getId())
-            .set(candidate)
-            .addOnSuccessListener(aVoid -> {
-                Toast.makeText(getContext(), "Candidate updated successfully", Toast.LENGTH_SHORT).show();
-                // No need to reload - listener will handle it
-            })
-            .addOnFailureListener(e -> 
-                Toast.makeText(getContext(), "Error updating candidate", Toast.LENGTH_SHORT).show());
+    private void showSuccess(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void deleteCandidate(Candidate candidate) {
-        db.collection("candidates").document(candidate.getId())
-            .delete()
-            .addOnSuccessListener(aVoid -> {
-                Toast.makeText(getContext(), "Candidate deleted successfully", Toast.LENGTH_SHORT).show();
-                // No need to reload - listener will handle it
-            })
-            .addOnFailureListener(e -> 
-                Toast.makeText(getContext(), "Error deleting candidate", Toast.LENGTH_SHORT).show());
+    private void showError(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onCandidateEdit(Candidate candidate) {
+    public void onCandidateClick(Candidate candidate) {
+        showCandidateDetails(candidate);
+    }
+
+    @Override
+    public void onEditClick(Candidate candidate) {
         showEditDialog(candidate);
     }
 
     @Override
-    public void onCandidateDelete(Candidate candidate) {
-        deleteCandidate(candidate);
+    public void onDeleteClick(Candidate candidate) {
+        showDeleteConfirmation(candidate);
     }
 
     private void showEditDialog(Candidate candidate) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_candidate, null);
         EditText editName = dialogView.findViewById(R.id.editName);
-        EditText editPosition = dialogView.findViewById(R.id.editPosition);
+        MaterialAutoCompleteTextView positionDropdown = dialogView.findViewById(R.id.editPosition);
         EditText editPartyList = dialogView.findViewById(R.id.editPartyList);
         EditText editPlatform = dialogView.findViewById(R.id.editPlatform);
+        setupPositionDropdown(positionDropdown);
+        positionDropdown.setText(candidate.getPosition(), false);
 
         // Pre-fill the fields
         editName.setText(candidate.getName());
-        editPosition.setText(candidate.getPosition());
         editPartyList.setText(candidate.getPartyList());
         editPlatform.setText(candidate.getPlatform());
 
@@ -255,12 +271,73 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
                 .setView(dialogView)
                 .setPositiveButton("Update", (dialog, which) -> {
                     candidate.setName(editName.getText().toString());
-                    candidate.setPosition(editPosition.getText().toString());
+                    candidate.setPosition(positionDropdown.getText().toString());
                     candidate.setPartyList(editPartyList.getText().toString());
                     candidate.setPlatform(editPlatform.getText().toString());
                     updateCandidate(candidate);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void loadCandidates() {
+        db.collection("candidates")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                candidates.clear();
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    Candidate candidate = doc.toObject(Candidate.class);
+                    if (candidate != null) {
+                        candidate.setId(doc.getId());
+                        candidates.add(candidate);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            })
+            .addOnFailureListener(e -> showError("Error loading candidates: " + e.getMessage()));
+    }
+
+    private void showCandidateDetails(Candidate candidate) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Candidate Details")
+               .setMessage("Name: " + candidate.getName() + "\n" +
+                         "Position: " + candidate.getPosition() + "\n" +
+                         "Party List: " + candidate.getPartyList() + "\n" +
+                         "Platform: " + candidate.getPlatform())
+               .setPositiveButton("OK", null)
+               .show();
+    }
+
+    private void showDeleteConfirmation(Candidate candidate) {
+        new AlertDialog.Builder(requireContext())
+            .setTitle("Delete Candidate")
+            .setMessage("Are you sure you want to delete this candidate?")
+            .setPositiveButton("Delete", (dialog, which) -> {
+                db.collection("candidates").document(candidate.getId())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        showSuccess("Candidate deleted successfully");
+                        loadCandidates();
+                    })
+                    .addOnFailureListener(e -> showError("Failed to delete: " + e.getMessage()));
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void updateCandidate(Candidate candidate) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", candidate.getName());
+        updates.put("position", candidate.getPosition());
+        updates.put("partyList", candidate.getPartyList());
+        updates.put("platform", candidate.getPlatform());
+
+        db.collection("candidates").document(candidate.getId())
+            .update(updates)
+            .addOnSuccessListener(aVoid -> {
+                showSuccess("Candidate updated successfully");
+                loadCandidates();
+            })
+            .addOnFailureListener(e -> showError("Failed to update: " + e.getMessage()));
     }
 }
