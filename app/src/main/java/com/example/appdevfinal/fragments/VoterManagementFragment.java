@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevfinal.R;
 import com.example.appdevfinal.models.User;
 import com.example.appdevfinal.adapters.VoterAdapter;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 
 public class VoterManagementFragment extends Fragment {
@@ -33,27 +34,29 @@ public class VoterManagementFragment extends Fragment {
         voterAdapter = new VoterAdapter(new ArrayList<>());
         voterRecyclerView.setAdapter(voterAdapter);
         
-        loadRegisteredVoters();
+        loadVoters();
         
         return view;
     }
 
-    private void loadRegisteredVoters() {
+    private void loadVoters() {
+        ArrayList<User> users = new ArrayList<>();
         db.collection("users")
-            .whereEqualTo("role", "voter") // Only get users with role "voter"
-            .addSnapshotListener((value, error) -> {
-                if (error != null) {
-                    return;
-                }
-                ArrayList<User> users = new ArrayList<>();
-                if (value != null) {
-                    for (QueryDocumentSnapshot doc : value) {
-                        User user = doc.toObject(User.class);
-                        user.setUid(doc.getId());
+            .whereEqualTo("role", "voter")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                for (DocumentSnapshot document : queryDocumentSnapshots) {
+                    User user = document.toObject(User.class);
+                    if (user != null) {
+                        user.setId(document.getId());
                         users.add(user);
                     }
-                    voterAdapter.updateVoters(users);
                 }
+                voterAdapter.updateVoters(users);
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(getContext(), "Error loading voters: " + e.getMessage(), 
+                    Toast.LENGTH_SHORT).show();
             });
     }
 }

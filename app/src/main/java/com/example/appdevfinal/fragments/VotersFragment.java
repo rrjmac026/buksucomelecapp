@@ -9,10 +9,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevfinal.R;
+import com.example.appdevfinal.adapters.VoterAdapter;
 import com.example.appdevfinal.models.Voter;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,43 +20,43 @@ public class VotersFragment extends Fragment {
     private RecyclerView recyclerView;
     private FirebaseFirestore db;
     private List<Voter> voters;
+    private VoterAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_voters, container, false);
         
-        db = FirebaseFirestore.getInstance();
-        voters = new ArrayList<>();
-        
-        recyclerView = view.findViewById(R.id.recyclerViewVoters);
+        recyclerView = view.findViewById(R.id.votersRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        loadVoters();
+        db = FirebaseFirestore.getInstance();
+        voters = new ArrayList<>();
+        adapter = new VoterAdapter(voters);
+        recyclerView.setAdapter(adapter);
 
+        loadVoters();
+        
         return view;
     }
 
     private void loadVoters() {
-        if (db == null) return;
-
-        db.collection("voters")
-            .addSnapshotListener((value, error) -> {
-                if (error != null) {
-                    Toast.makeText(getContext(), "Error loading voters: " + error.getMessage(), 
-                        Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (value != null) {
-                    voters.clear();
-                    for (QueryDocumentSnapshot doc : value) {
-                        Voter voter = doc.toObject(Voter.class);
-                        if (voter != null) {
-                            voter.setId(doc.getId());
-                            voters.add(voter);
-                        }
+        db.collection("users")
+            .whereEqualTo("role", "voter")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                voters.clear();
+                for (DocumentSnapshot document : queryDocumentSnapshots) {
+                    Voter voter = document.toObject(Voter.class);
+                    if (voter != null) {
+                        voter.setId(document.getId());
+                        voters.add(voter);
                     }
                 }
+                adapter.notifyDataSetChanged();
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(getContext(), "Error loading voters: " + e.getMessage(), 
+                    Toast.LENGTH_SHORT).show();
             });
     }
 }

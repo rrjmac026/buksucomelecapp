@@ -8,13 +8,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevfinal.R;
 import com.example.appdevfinal.models.User;
+import com.example.appdevfinal.models.Voter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VoterAdapter extends RecyclerView.Adapter<VoterAdapter.VoterViewHolder> {
-    private List<User> users;
+    private List<Voter> voters;
 
-    public VoterAdapter(List<User> users) {
-        this.users = users;
+    public VoterAdapter(List<Voter> voters) {
+        this.voters = voters;
     }
 
     @NonNull
@@ -27,30 +29,44 @@ public class VoterAdapter extends RecyclerView.Adapter<VoterAdapter.VoterViewHol
 
     @Override
     public void onBindViewHolder(@NonNull VoterViewHolder holder, int position) {
-        User user = users.get(position);
-        holder.nameText.setText(user.getName() != null ? user.getName() : "N/A");
-        holder.emailText.setText(user.getEmail() != null ? user.getEmail() : "N/A");
-        holder.studentIdText.setText(user.getStudentId() != null ? user.getStudentId() : "N/A");
+        Voter voter = voters.get(position);
+        holder.emailText.setText(voter.getEmail());
+        holder.studentIdText.setText(voter.getStudentId());
+        holder.statusText.setText(voter.hasVoted() ? "Has Voted" : "Not Voted");
     }
 
     @Override
     public int getItemCount() {
-        return users.size();
+        return voters.size();
     }
 
-    public void updateVoters(List<User> newUsers) {
-        users = newUsers;
+    public void updateVoters(List<User> users) {
+        List<Voter> voters = new ArrayList<>();
+        for (User user : users) {
+            if ("voter".equals(user.getRole())) {
+                Voter voter = new Voter();
+                voter.setId(user.getId());
+                voter.setEmail(user.getEmail());
+                voter.setStudentId(user.getStudentId());
+                voter.setRole(user.getRole());
+                voter.setHasVoted(user.hasVoted());
+                voters.add(voter);
+            }
+        }
+        this.voters = voters;
         notifyDataSetChanged();
     }
 
     static class VoterViewHolder extends RecyclerView.ViewHolder {
-        TextView nameText, emailText, studentIdText;
+        TextView emailText;
+        TextView studentIdText;
+        TextView statusText;
 
         VoterViewHolder(View itemView) {
             super(itemView);
-            nameText = itemView.findViewById(R.id.voterName);
             emailText = itemView.findViewById(R.id.voterEmail);
             studentIdText = itemView.findViewById(R.id.voterStudentId);
+            statusText = itemView.findViewById(R.id.voterStatus);
         }
     }
 }
