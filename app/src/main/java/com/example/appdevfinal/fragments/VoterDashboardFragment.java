@@ -27,58 +27,45 @@ public class VoterDashboardFragment extends Fragment {
         votingStatusCard = view.findViewById(R.id.votingStatusCard);
         db = FirebaseFirestore.getInstance();
 
-        loadUserData();
-        checkVotingStatus();
-        
+        loadUserDataAndVotingStatus();
         return view;
     }
 
-    private void loadUserData() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
-            String userId = auth.getCurrentUser().getUid();
-            db.collection("users").document(userId).get()
-                .addOnSuccessListener(document -> {
-                    if (document.exists()) {
-                        String name = document.getString("name");
-                        String studentNumber = document.getString("studentNumber"); // Changed from studentId
-                        String welcomeMessage = String.format("Welcome, %s\nStudent Number: %s", 
-                            name != null ? name : "Voter",
-                            studentNumber != null ? studentNumber : "Not available");
-                        welcomeText.setText(welcomeMessage);
-                        
-                        // Debug log
-                        Log.d("VoterDashboard", "Document data: " + document.getData());
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("VoterDashboard", "Error fetching user data", e);
-                    welcomeText.setText("Welcome, Voter\nStudent Number: Not available");
-                });
-        }
-    }
+    private void loadUserDataAndVotingStatus() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener(document -> {
+                if (document.exists()) {
+                    // Update welcome text immediately
+                    String name = document.getString("name");
+                    String studentNumber = document.getString("studentNumber");
+                    welcomeText.setText(String.format("Welcome, %s\nStudent Number: %s", 
+                        name != null ? name : "Voter",
+                        studentNumber != null ? studentNumber : "Not available"));
 
-    private void checkVotingStatus() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
-            String userId = auth.getCurrentUser().getUid();
-            db.collection("votes").document(userId).get()
-                .addOnSuccessListener(document -> {
-                    if (document.exists()) {
-                        String candidateName = document.getString("candidateName");
-                        String timestamp = document.getString("timestamp");
-                        String voteStatus = "You have voted for: " + candidateName + 
-                                         "\nVoted on: " + timestamp;
-                        votingStatusText.setText(voteStatus);
+                    // Update voting status
+                    Boolean hasVoted = document.getBoolean("hasVoted");
+                    if (hasVoted != null && hasVoted) {
+                        votingStatusText.setText("You have already cast your vote!");
                         votingStatusCard.setVisibility(View.VISIBLE);
                     } else {
                         votingStatusText.setText("You haven't voted yet. Please proceed to the Vote page.");
                         votingStatusCard.setVisibility(View.VISIBLE);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("VoterDashboard", "Error checking voting status", e);
-                });
-        }
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("VoterDashboard", "Error loading user data", e);
+                welcomeText.setText("Welcome\nUnable to load user data");
+                votingStatusText.setText("Unable to check voting status");
+                votingStatusCard.setVisibility(View.VISIBLE);
+            });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadUserDataAndVotingStatus(); // Refresh data when returning to fragment
     }
 }

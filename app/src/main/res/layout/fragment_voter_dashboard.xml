@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -11,14 +12,14 @@
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@color/buksu_purple"
-        android:layout_marginBottom="16dp"/>
+        android:textColor="@color/buksu_purple"/>
 
+    <!-- Voting Status Card - Only for Voters -->
     <androidx.cardview.widget.CardView
         android:id="@+id/votingStatusCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp">
+        android:layout_marginTop="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -27,13 +28,10 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/votingStatusTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Voting Status"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/buksu_purple"/>
+                android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/votingStatusText"
@@ -42,4 +40,5 @@
                 android:layout_marginTop="8dp"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
 </LinearLayout>

@@ -2,18 +2,15 @@
 <resources>
     <style name="Theme.AppDevFinal" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/buksu_gold</item>
-        <item name="colorPrimaryDark">@color/buksu_deep_purple</item>
+        <item name="colorPrimaryDark">@color/buksu_purple</item>
         <item name="colorAccent">@color/buksu_gold</item>
         <item name="android:windowBackground">@color/dark_background</item>
         <item name="android:textColorPrimary">@color/text_color_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_color_secondary_dark</item>
-        <item name="colorSurface">@color/surface_color_dark</item>
-        <item name="colorOnSurface">@color/on_surface_dark</item>
         <item name="android:textColorHint">@color/text_color_hint_dark</item>
-    </style>
-
-    <style name="Theme.AppDevFinal.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorSurface">@color/dark_surface</item>
+        <item name="android:statusBarColor">@color/buksu_purple</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

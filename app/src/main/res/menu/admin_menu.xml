@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/nav_rankings"
+        android:icon="@drawable/ic_how_to_vote"
+        android:title="Rankings"/>
+
     <item
         android:id="@+id/action_toggle_theme"
         android:icon="@drawable/ic_brightness"
         android:title="Toggle Theme"
+        android:orderInCategory="1"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="Settings"
+        android:orderInCategory="2"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_logout"

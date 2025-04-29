@@ -1,15 +1,21 @@
 package com.example.appdevfinal.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import androidx.fragment.app.Fragment;
+import com.bumptech.glide.Glide;
 import com.example.appdevfinal.R;
 import com.example.appdevfinal.models.Candidate;
 import com.google.android.material.snackbar.Snackbar;
@@ -25,39 +31,101 @@ import java.util.List;
 import java.util.Map;
 
 public class VoteFragment extends Fragment {
+    private ProgressBar loadingProgressBar;
+    private TextView votingStatusText;
+    private ImageView alreadyVotedImage;
     private RadioGroup presidentGroup, vpGroup;
     private LinearLayout senatorsGroup;
     private Button submitVoteButton;
     private FirebaseFirestore db;
+    private View votingLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_vote, container, false);
         
-        // Initialize Firebase
+        // Initialize Firebase first
         db = FirebaseFirestore.getInstance();
         
         // Initialize views
-        presidentGroup = view.findViewById(R.id.presidentGroup);
-        vpGroup = view.findViewById(R.id.vpGroup);
-        senatorsGroup = view.findViewById(R.id.senatorsGroup);
-        submitVoteButton = view.findViewById(R.id.submitVoteButton);
-
-        loadCandidates();
+        initializeViews(view);
+        
+        // Check voting status
+        checkVotingStatus();
+        
+        // Set click listener
         submitVoteButton.setOnClickListener(v -> validateAndSubmitVote());
         
         return view;
     }
 
-    private void loadCandidates() {
-        // Clear existing options
-        presidentGroup.removeAllViews();
-        vpGroup.removeAllViews();
-        senatorsGroup.removeAllViews();
+    private void initializeViews(View view) {
+        loadingProgressBar = view.findViewById(R.id.loadingProgressBar);
+        votingStatusText = view.findViewById(R.id.votingStatusText);
+        alreadyVotedImage = view.findViewById(R.id.alreadyVotedImage);
+        presidentGroup = view.findViewById(R.id.presidentGroup);
+        vpGroup = view.findViewById(R.id.vpGroup);
+        senatorsGroup = view.findViewById(R.id.senatorsGroup);
+        submitVoteButton = view.findViewById(R.id.submitVoteButton);
+        votingLayout = view.findViewById(R.id.votingLayout);
+        
+        // Set initial visibility
+        loadingProgressBar.setVisibility(View.VISIBLE);
+        votingStatusText.setVisibility(View.GONE);
+        alreadyVotedImage.setVisibility(View.GONE);
+        votingLayout.setVisibility(View.GONE);
+    }
 
-        db.collection("candidates")
-            .get()
+    private void checkVotingStatus() {
+        if (!isAdded() || getActivity() == null) return;
+        
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (!isAdded()) return;
+                
+                if (documentSnapshot.exists() && Boolean.TRUE.equals(documentSnapshot.getBoolean("hasVoted"))) {
+                    showVotedStatus();
+                } else {
+                    loadCandidates();
+                }
+            })
+            .addOnFailureListener(e -> {
+                if (!isAdded()) return;
+                loadingProgressBar.setVisibility(View.GONE);
+                showError("Error checking vote status: " + e.getMessage());
+            });
+    }
+
+    private void showVotedStatus() {
+        if (!isAdded()) return;
+        
+        loadingProgressBar.setVisibility(View.GONE);
+        votingLayout.setVisibility(View.GONE);
+        votingStatusText.setVisibility(View.VISIBLE);
+        alreadyVotedImage.setVisibility(View.VISIBLE);
+        
+        Glide.with(requireContext())
+            .asGif()
+            .load(R.drawable.peaceout)
+            .into(alreadyVotedImage);
+    }
+
+    private void loadCandidates() {
+        if (!isAdded()) return;
+        
+        db.collection("candidates").get()
             .addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!isAdded()) return;
+                
+                loadingProgressBar.setVisibility(View.GONE);
+                votingLayout.setVisibility(View.VISIBLE);
+                
+                // Clear existing views
+                presidentGroup.removeAllViews();
+                vpGroup.removeAllViews();
+                senatorsGroup.removeAllViews();
+                
                 for (DocumentSnapshot document : queryDocumentSnapshots) {
                     Candidate candidate = document.toObject(Candidate.class);
                     if (candidate != null) {
@@ -69,13 +137,17 @@ public class VoteFragment extends Fragment {
                                 addRadioButton(vpGroup, candidate);
                                 break;
                             case "senator":
-                                addCheckBox(senatorsGroup, candidate);
+                                addCheckBox(candidate.getId(), candidate.getName());
                                 break;
                         }
                     }
                 }
             })
-            .addOnFailureListener(e -> showError("Failed to load candidates: " + e.getMessage()));
+            .addOnFailureListener(e -> {
+                if (!isAdded()) return;
+                loadingProgressBar.setVisibility(View.GONE);
+                showError("Failed to load candidates: " + e.getMessage());
+            });
     }
 
     private void addRadioButton(RadioGroup group, Candidate candidate) {
@@ -89,14 +161,19 @@ public class VoteFragment extends Fragment {
         group.addView(rb);
     }
 
-    private void addCheckBox(LinearLayout group, Candidate candidate) {
-        CheckBox cb = new CheckBox(requireContext());
-        cb.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT));
-        cb.setText(candidate.getName());
-        cb.setPadding(32, 32, 32, 32);
-        group.addView(cb);
+    private void addCheckBox(String candidateId, String candidateName) {
+        if (!isAdded()) return; // Guard against fragment not attached
+        
+        try {
+            Context context = requireContext();
+            CheckBox checkBox = new CheckBox(context);
+            checkBox.setText(candidateName);
+            checkBox.setId(View.generateViewId());
+            checkBox.setPadding(32, 32, 32, 32);
+            senatorsGroup.addView(checkBox);
+        } catch (IllegalStateException e) {
+            Log.e("VoteFragment", "Failed to add checkbox - Fragment not attached", e);
+        }
     }
 
     private void validateAndSubmitVote() {

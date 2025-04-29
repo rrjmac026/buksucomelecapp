@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material Theme Colors -->
-    <color name="colorPrimary">#380041</color>
-    <color name="colorPrimaryDark">#2A0031</color>
-    <color name="colorAccent">#F9B40F</color>
-    
-    <!-- Brand Colors -->
+    <!-- BukSU Colors -->
     <color name="buksu_purple">#380041</color>
-    <color name="buksu_deep_purple">#380041</color>
-    <color name="buksu_gold">#F9B40F</color>
-    
-    <!-- Base Colors -->
+    <color name="buksu_gold">#f9b40f</color>
+    <color name="buksu_deep_purple">#2A0031</color>
+
+    <!-- Theme Colors -->
+    <color name="colorPrimary">@color/buksu_purple</color>
+    <color name="colorPrimaryDark">@color/buksu_deep_purple</color>
+    <color name="colorAccent">@color/buksu_gold</color>
+
+    <!-- Light Theme Colors -->
+    <color name="light_background">#FFFFFF</color>
+    <color name="text_color_primary_light">#DE000000</color>
+    <color name="text_color_secondary_light">#99000000</color>
+    <color name="on_surface_light">#000000</color>
+    <color name="surface_color_light">#FFFFFF</color>
+
+    <!-- Dark Theme Colors -->
+    <color name="dark_background">#121212</color>
+    <color name="text_color_primary_dark">#FFFFFF</color>
+    <color name="text_color_secondary_dark">#B3FFFFFF</color>
+    <color name="on_surface_dark">#FFFFFF</color>
+    <color name="surface_color_dark">#121212</color>
+    <color name="text_color_hint_dark">#80FFFFFF</color>
+
+    <!-- Standard Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="dark_background">#121212</color>
-    
-    <!-- Light Theme Colors -->
-    <color name="light_background">@color/white</color>
-    <color name="surface_color_light">@color/white</color>
-    <color name="on_surface_light">@color/black</color>
-    <color name="text_color_primary_light">@color/buksu_deep_purple</color>
-    <color name="text_color_secondary_light">#99380041</color>
-    <color name="text_color_hint_light">#61380041</color>
-    
-    <!-- Dark Theme Colors -->
-    <color name="surface_color_dark">#1E1E1E</color>
-    <color name="on_surface_dark">@color/white</color>
-    <color name="text_color_primary_dark">@color/buksu_gold</color>
-    <color name="text_color_secondary_dark">#99F9B40F</color>
-    <color name="text_color_hint_dark">#61FFFFFF</color>
 </resources>
