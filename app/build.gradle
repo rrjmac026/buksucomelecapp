@@ -46,4 +46,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-appcheck-debug'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
+
+    // iText PDF library
+    implementation 'com.itextpdf:itextg:5.5.10'
+
+    // Permissions handling
+    implementation 'com.karumi:dexter:6.2.3'
+    implementation 'androidx.core:core:1.12.0'
 }

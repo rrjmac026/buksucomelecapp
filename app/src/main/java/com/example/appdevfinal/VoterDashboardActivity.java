@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import com.example.appdevfinal.fragments.FeedbackFragment;
 import com.example.appdevfinal.fragments.RankingsFragment;
 import com.example.appdevfinal.fragments.VoteFragment;
 import com.example.appdevfinal.fragments.VoterDashboardFragment;
@@ -95,6 +96,10 @@ public class VoterDashboardActivity extends AppCompatActivity
         } else if (id == R.id.nav_vote) {
             getSupportFragmentManager().beginTransaction()
                 .replace(R.id.nav_host_fragment, new VoteFragment())
+                .commit();
+        } else if (id == R.id.nav_feedback) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new FeedbackFragment())
                 .commit();
         } else if (id == R.id.nav_logout) {
             FirebaseAuth.getInstance().signOut();

@@ -13,6 +13,18 @@
             android:id="@+id/nav_rankings"
             android:icon="@android:drawable/ic_menu_sort_by_size"
             android:title="Rankings" />
+        <item
+            android:id="@+id/nav_voter_management"
+            android:icon="@drawable/ic_voters" 
+            android:title="Voter Management"/>
+        <item
+            android:id="@+id/nav_reports"
+            android:icon="@android:drawable/ic_menu_report_image"
+            android:title="Reports"/>
+        <item
+            android:id="@+id/nav_feedback"
+            android:icon="@drawable/ic_feedback"
+            android:title="Voter Feedback"/>
     </group>
 
     <item android:title="Account">

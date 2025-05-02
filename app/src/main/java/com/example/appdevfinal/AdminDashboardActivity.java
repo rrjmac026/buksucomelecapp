@@ -14,6 +14,8 @@ import com.example.appdevfinal.fragments.CandidatesFragment;
 import com.example.appdevfinal.fragments.RankingsFragment;
 import com.example.appdevfinal.fragments.SettingsFragment;
 import com.example.appdevfinal.fragments.VoterManagementFragment;
+import com.example.appdevfinal.fragments.AdminFeedbackFragment;
+import com.example.appdevfinal.fragments.ReportsFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -70,7 +72,15 @@ public class AdminDashboardActivity extends AppCompatActivity
                 .commit();
         } else if (id == R.id.nav_voter_management) {
             getSupportFragmentManager().beginTransaction()
-                .replace(R.id.nav_host_fragment, new VoterManagementFragment())
+                .replace(R.id.fragment_container, new VoterManagementFragment())
+                .commit();
+        } else if (id == R.id.nav_reports) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new ReportsFragment())
+                .commit();
+        } else if (id == R.id.nav_feedback) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new AdminFeedbackFragment())
                 .commit();
         } else if (id == R.id.nav_logout) {
             FirebaseAuth.getInstance().signOut();

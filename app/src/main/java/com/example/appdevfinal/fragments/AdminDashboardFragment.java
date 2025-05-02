@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import com.example.appdevfinal.R;
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -16,35 +17,30 @@ import com.google.firebase.Timestamp;
 import java.util.Date;
 
 public class AdminDashboardFragment extends Fragment {
-    private TextView candidateCountText, votesCountText, votersCountText, recentActivityText;
+    private TextView votesCountText, votersCountText, recentActivityText;
+    private MaterialCardView viewResultsCard;
     private FirebaseFirestore db;
     private ListenerRegistration votesListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_admin_dashboard, container, false);
-        
-        db = FirebaseFirestore.getInstance();
         initializeViews(view);
         loadCounts();
         setupRealtimeUpdates();
-        
+        setupClickListeners();
         return view;
     }
 
     private void initializeViews(View view) {
-        candidateCountText = view.findViewById(R.id.candidateCountText);
         votesCountText = view.findViewById(R.id.votesCountText);
         votersCountText = view.findViewById(R.id.votersCountText);
         recentActivityText = view.findViewById(R.id.recentActivityText);
+        viewResultsCard = view.findViewById(R.id.viewResultsCard);
+        db = FirebaseFirestore.getInstance();
     }
 
     private void loadCounts() {
-        // Get candidate count
-        db.collection("candidates").get()
-            .addOnSuccessListener(querySnapshot -> 
-                candidateCountText.setText(String.valueOf(querySnapshot.size())));
-
         // Get total voters count
         db.collection("users")
             .whereEqualTo("role", "voter")
@@ -81,6 +77,17 @@ public class AdminDashboardFragment extends Fragment {
                         }
                     });
             });
+    }
+
+    private void setupClickListeners() {
+        if (viewResultsCard != null) {
+            viewResultsCard.setOnClickListener(v -> {
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new RankingsFragment())
+                    .addToBackStack(null)
+                    .commit();
+            });
+        }
     }
 
     private String getTimeAgo(Date date) {

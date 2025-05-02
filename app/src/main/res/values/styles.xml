@@ -50,4 +50,16 @@
         <item name="android:buttonTint">@color/buksu_deep_purple</item>
     </style>
 
+    <style name="CustomMaterialDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="android:background">@color/buksu_gold</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="rippleColor">@color/buksu_gold</item>
+        <item name="android:backgroundTint">@color/buksu_deep_purple</item>
+    </style>
+
 </resources>

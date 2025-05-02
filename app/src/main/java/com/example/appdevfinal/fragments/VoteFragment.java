@@ -15,11 +15,15 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.RatingBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.appdevfinal.R;
 import com.example.appdevfinal.models.Candidate;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -291,10 +295,7 @@ public class VoteFragment extends Fragment {
                         for (String senator : selectedSenators) {
                             incrementCandidateVotes(senator);
                         }
-                        showSuccess("Vote submitted successfully!");
-                        clearSelections();
-                        // Show voted status immediately
-                        showVotedStatus();
+                        showFeedbackDialog();
                     })
                     .addOnFailureListener(e -> {
                         showError("Error updating voter status: " + e.getMessage());
@@ -341,5 +342,47 @@ public class VoteFragment extends Fragment {
                 .setBackgroundTint(getResources().getColor(R.color.buksu_deep_purple))
                 .setTextColor(getResources().getColor(R.color.buksu_gold))
                 .show();
+    }
+
+    private void showFeedbackDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_feedback, null);
+        TextInputEditText feedbackInput = dialogView.findViewById(R.id.feedbackInput);
+        RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .setPositiveButton("Submit", (dialog, which) -> {
+                String feedback = feedbackInput.getText().toString();
+                float rating = ratingBar.getRating();
+                submitFeedback(feedback, rating);
+            });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Style the button
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        positiveButton.setTextColor(getResources().getColor(R.color.white));
+        positiveButton.setBackgroundColor(getResources().getColor(R.color.buksu_deep_purple));
+        positiveButton.setPadding(40, 0, 40, 0);
+    }
+
+    private void submitFeedback(String feedback, float rating) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Map<String, Object> feedbackData = new HashMap<>();
+        feedbackData.put("userId", userId);
+        feedbackData.put("feedback", feedback);
+        feedbackData.put("rating", rating);
+        feedbackData.put("timestamp", new Date());
+
+        db.collection("feedback")
+            .add(feedbackData)
+            .addOnSuccessListener(documentReference -> {
+                showSuccess("Thank you for your feedback!");
+                showVotedStatus();
+            })
+            .addOnFailureListener(e -> 
+                showError("Failed to submit feedback: " + e.getMessage()));
     }
 }
