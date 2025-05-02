@@ -29,29 +29,25 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.Cand
     @NonNull
     @Override
     public CandidateViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_candidate, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_candidate, parent, false);
         return new CandidateViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CandidateViewHolder holder, int position) {
         Candidate candidate = candidates.get(position);
-        holder.nameTextView.setText(candidate.getName());
-        holder.positionTextView.setText(candidate.getPosition());
-        holder.partyTextView.setText(candidate.getPartyList());
-
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onCandidateClick(candidate);
-            }
-        });
-
+        holder.candidateNameText.setText(candidate.getName());
+        holder.candidatePositionText.setText(candidate.getPosition());
+        holder.candidatePartyText.setText(candidate.getPartyList());
+        
+        // Set click listeners for buttons
         holder.editButton.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onEditClick(candidate);
             }
         });
-
+        
         holder.deleteButton.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onDeleteClick(candidate);
@@ -65,17 +61,17 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.Cand
     }
 
     static class CandidateViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView;
-        TextView positionTextView;
-        TextView partyTextView;
+        TextView candidateNameText;
+        TextView candidatePositionText;
+        TextView candidatePartyText;
         ImageButton editButton;
         ImageButton deleteButton;
 
-        public CandidateViewHolder(@NonNull View itemView) {
+        CandidateViewHolder(View itemView) {
             super(itemView);
-            nameTextView = itemView.findViewById(R.id.candidateName);
-            positionTextView = itemView.findViewById(R.id.candidatePosition);
-            partyTextView = itemView.findViewById(R.id.candidateParty);
+            candidateNameText = itemView.findViewById(R.id.candidateNameText);
+            candidatePositionText = itemView.findViewById(R.id.candidatePositionText);
+            candidatePartyText = itemView.findViewById(R.id.candidatePartyText);
             editButton = itemView.findViewById(R.id.editButton);
             deleteButton = itemView.findViewById(R.id.deleteButton);
         }

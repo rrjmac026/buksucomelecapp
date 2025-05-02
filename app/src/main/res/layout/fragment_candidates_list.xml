@@ -1,62 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/ic_body_color">
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_margin="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#80FFFFFF">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="8dp">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search candidates"
-                    app:startIconDrawable="@android:drawable/ic_menu_search"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/searchView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Spinner
-                    android:id="@+id/spinnerSort"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewCandidates"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Manage Candidates"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/buksu_deep_purple"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search candidates"
+                app:startIconDrawable="@android:drawable/ic_menu_search"
+                app:startIconTint="@color/buksu_deep_purple"
+                app:boxStrokeColor="@color/buksu_deep_purple"
+                app:hintTextColor="@color/buksu_deep_purple"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/searchView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/buksu_deep_purple"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Spinner
+                android:id="@+id/spinnerSort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:backgroundTint="@color/buksu_deep_purple"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewCandidates"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddCandidate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="Add Candidate"
+        android:layout_margin="24dp"
         android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/buksu_purple"
-        app:tint="@color/white" />
+        app:backgroundTint="@color/buksu_gold"
+        app:tint="@color/buksu_deep_purple"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

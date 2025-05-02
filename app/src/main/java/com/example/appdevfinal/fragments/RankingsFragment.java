@@ -1,6 +1,7 @@
 package com.example.appdevfinal.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,94 +42,149 @@ public class RankingsFragment extends Fragment {
     private void loadRankings() {
         if (!isAdded()) return;
         loadingProgressBar.setVisibility(View.VISIBLE);
-        
-        db.collection("votes").get().addOnSuccessListener(votesSnapshot -> {
-            if (!isAdded()) return;
 
-            Map<String, Integer> rankings = new HashMap<>();
-            Map<String, String> candidatePositions = new HashMap<>();
-            
-            for (var vote : votesSnapshot.getDocuments()) {
-                String president = vote.getString("president");
-                if (president != null) {
-                    rankings.put(president, rankings.getOrDefault(president, 0) + 1);
-                    candidatePositions.put(president, "President");
-                }
-                
-                String vp = vote.getString("vicePresident");
-                if (vp != null) {
-                    rankings.put(vp, rankings.getOrDefault(vp, 0) + 1);
-                    candidatePositions.put(vp, "Vice President");
-                }
-                
-                List<String> senators = (List<String>) vote.get("senators");
-                if (senators != null) {
-                    for (String senator : senators) {
-                        rankings.put(senator, rankings.getOrDefault(senator, 0) + 1);
-                        candidatePositions.put(senator, "Senator");
-                    }
-                }
+        // Check network connectivity first
+        if (!isNetworkAvailable()) {
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_LONG).show();
             }
+            loadingProgressBar.setVisibility(View.GONE);
+            return;
+        }
 
-            db.collection("candidates").get().addOnSuccessListener(candidatesSnapshot -> {
-                if (!isAdded()) return;
-                
+        // First get candidates to establish the structure
+        db.collection("candidates")
+            .get()
+            .addOnSuccessListener(candidatesSnapshot -> {
                 List<RankingItem> presidents = new ArrayList<>();
-                List<RankingItem> vicePresidents = new ArrayList<>();
+                List<RankingItem> vps = new ArrayList<>();
                 List<RankingItem> senators = new ArrayList<>();
-                
-                for (var doc : candidatesSnapshot.getDocuments()) {
+
+                // Create initial ranking items with 0 votes
+                for (var doc : candidatesSnapshot) {
                     String name = doc.getString("name");
                     String position = doc.getString("position");
                     String partyList = doc.getString("partyList");
-                    
-                    if (name != null && position != null && rankings.containsKey(name)) {
-                        int votes = rankings.get(name);
-                        RankingItem item = new RankingItem(name, position, partyList, votes);
-                        
+
+                    if (name != null && position != null) {
+                        RankingItem item = new RankingItem(name, position, partyList, 0);
                         switch (position.toLowerCase()) {
-                            case "president":
-                                presidents.add(item);
-                                break;
-                            case "vice president":
-                                vicePresidents.add(item);
-                                break;
-                            case "senator":
-                                senators.add(item);
-                                break;
+                            case "president": presidents.add(item); break;
+                            case "vice president": vps.add(item); break;
+                            case "senator": senators.add(item); break;
                         }
                     }
                 }
-                
-                // Sort each category by vote count
-                Comparator<RankingItem> byVotes = (a, b) -> Integer.compare(b.votes, a.votes);
-                presidents.sort(byVotes);
-                vicePresidents.sort(byVotes);
-                senators.sort(byVotes);
-                
-                // Combine all items maintaining position order
-                List<RankingItem> allRankings = new ArrayList<>();
-                
-                // Add section headers and items
-                if (!presidents.isEmpty()) {
-                    allRankings.add(new RankingItem("PRESIDENT", "", "", -1)); // Header
-                    allRankings.addAll(presidents);
+
+                // Now count votes exactly like in Admin Dashboard
+                db.collection("votes")
+                    .get()
+                    .addOnSuccessListener(votesSnapshot -> {
+                        Log.d("RankingsFragment", "Total votes found: " + votesSnapshot.size());
+                        
+                        // Count votes
+                        for (var voteDoc : votesSnapshot) {
+                            // Count president votes
+                            String president = voteDoc.getString("president");
+                            if (president != null) {
+                                president = president.trim().replaceAll("\\s+", " ");
+                                for (RankingItem item : presidents) {
+                                    String comparison = (item.name + " " + item.partyList).trim().replaceAll("\\s+", " ");
+                                    if (president.equals(comparison)) {
+                                        item.votes++;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // Count VP votes
+                            String vp = voteDoc.getString("vicePresident");
+                            if (vp != null) {
+                                vp = vp.trim().replaceAll("\\s+", " ");
+                                for (RankingItem item : vps) {
+                                    String comparison = (item.name + " " + item.partyList).trim().replaceAll("\\s+", " ");
+                                    if (vp.equals(comparison)) {
+                                        item.votes++;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // Count senator votes
+                            List<String> senatorVotes = (List<String>) voteDoc.get("senators");
+                            if (senatorVotes != null) {
+                                for (String senatorVote : senatorVotes) {
+                                    String cleanSenatorVote = senatorVote.trim().replaceAll("\\s+", " ");
+                                    for (RankingItem item : senators) {
+                                        String comparison = (item.name + " " + item.partyList).trim().replaceAll("\\s+", " ");
+                                        if (cleanSenatorVote.equals(comparison)) {
+                                            item.votes++;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // After counting all votes, log the results
+                        Log.d("RankingsFragment", "Final vote counts:");
+                        for (RankingItem item : presidents) {
+                            Log.d("RankingsFragment", "President " + item.name + ": " + item.votes + " votes");
+                        }
+                        for (RankingItem item : vps) {
+                            Log.d("RankingsFragment", "VP " + item.name + ": " + item.votes + " votes");
+                        }
+                        for (RankingItem item : senators) {
+                            Log.d("RankingsFragment", "Senator " + item.name + ": " + item.votes + " votes");
+                        }
+
+                        // Sort by votes
+                        Comparator<RankingItem> byVotes = (a, b) -> Integer.compare(b.votes, a.votes);
+                        presidents.sort(byVotes);
+                        vps.sort(byVotes);
+                        senators.sort(byVotes);
+
+                        // Create final list
+                        List<RankingItem> allRankings = new ArrayList<>();
+                        
+                        if (!presidents.isEmpty()) {
+                            allRankings.add(new RankingItem("PRESIDENT", "", "", -1));
+                            allRankings.addAll(presidents);
+                        }
+                        if (!vps.isEmpty()) {
+                            allRankings.add(new RankingItem("VICE PRESIDENT", "", "", -1));
+                            allRankings.addAll(vps);
+                        }
+                        if (!senators.isEmpty()) {
+                            allRankings.add(new RankingItem("SENATORS", "", "", -1));
+                            allRankings.addAll(senators);
+                        }
+
+                        loadingProgressBar.setVisibility(View.GONE);
+                        recyclerView.setAdapter(new RankingsAdapter(allRankings));
+                    })
+                    .addOnFailureListener(e -> {
+                        if (getContext() != null) {
+                            Toast.makeText(getContext(), "Failed to load votes: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                        loadingProgressBar.setVisibility(View.GONE);
+                    });
+            })
+            .addOnFailureListener(e -> {
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Failed to load candidates: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
-                
-                if (!vicePresidents.isEmpty()) {
-                    allRankings.add(new RankingItem("VICE PRESIDENT", "", "", -1)); // Header
-                    allRankings.addAll(vicePresidents);
-                }
-                
-                if (!senators.isEmpty()) {
-                    allRankings.add(new RankingItem("SENATORS", "", "", -1)); // Header
-                    allRankings.addAll(senators);
-                }
-                
                 loadingProgressBar.setVisibility(View.GONE);
-                recyclerView.setAdapter(new RankingsAdapter(allRankings));
             });
-        });
+    }
+
+    private boolean isNetworkAvailable() {
+        if (getContext() == null) return false;
+        android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) 
+            getContext().getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager == null) return false;
+        android.net.NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
     
     private static class RankingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

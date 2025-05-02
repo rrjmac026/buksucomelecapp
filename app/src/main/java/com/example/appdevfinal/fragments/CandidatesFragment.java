@@ -166,13 +166,27 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
                 candidates.sort((c1, c2) -> c2.getName().compareTo(c1.getName()));
                 break;
             case 2: // Position
-                candidates.sort((c1, c2) -> c1.getPosition().compareTo(c2.getPosition()));
+                candidates.sort((c1, c2) -> {
+                    // Custom position order: President -> Vice President -> Senator
+                    int pos1 = getPositionWeight(c1.getPosition());
+                    int pos2 = getPositionWeight(c2.getPosition());
+                    return Integer.compare(pos1, pos2);
+                });
                 break;
             case 3: // Party List
                 candidates.sort((c1, c2) -> c1.getPartyList().compareTo(c2.getPartyList()));
                 break;
         }
         adapter.notifyDataSetChanged();
+    }
+
+    private int getPositionWeight(String position) {
+        switch (position.toLowerCase()) {
+            case "president": return 1;
+            case "vice president": return 2;
+            case "senator": return 3;
+            default: return 4;
+        }
     }
 
     private void setupPositionDropdown(MaterialAutoCompleteTextView positionDropdown) {

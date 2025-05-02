@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp">
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#80FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="12dp"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -17,43 +23,45 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/candidateName"
-                android:layout_width="match_parent"
+                android:id="@+id/candidateNameText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/buksu_deep_purple"/>
 
             <TextView
-                android:id="@+id/candidatePosition"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"/>
-
-            <TextView
-                android:id="@+id/candidateParty"
-                android:layout_width="match_parent"
+                android:id="@+id/candidatePositionText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textStyle="italic"/>
+                android:textColor="@color/buksu_purple"/>
+
+            <TextView
+                android:id="@+id/candidatePartyText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textStyle="italic"
+                android:textColor="@color/buksu_gold"/>
         </LinearLayout>
 
         <ImageButton
             android:id="@+id/editButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_marginStart="8dp"
-            android:src="@drawable/ic_edit"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Edit"/>
+            android:src="@drawable/ic_edit"
+            android:tint="@color/buksu_deep_purple"/>
 
         <ImageButton
             android:id="@+id/deleteButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_marginStart="8dp"
-            android:src="@drawable/ic_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Delete"/>
+            android:src="@drawable/ic_delete"
+            android:tint="@color/buksu_deep_purple"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

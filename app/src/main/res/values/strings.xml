@@ -13,7 +13,7 @@
     <string name="nav_header_subtitle">Admin Dashboard</string>
     <string name="nav_header_desc">BukSU Logo</string>
     <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
-    <string name="web_client_id">283911684117-rolv87gsd5qeiavvalv8d29stjer8tv6.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">YOUR_WEB_CLIENT_ID_HERE</string>
     <string name="nav_vote">Vote</string>
     <string name="nav_profile">My Profile</string>
     <string name="voter_header_title">BukSU-Comelec2025</string>

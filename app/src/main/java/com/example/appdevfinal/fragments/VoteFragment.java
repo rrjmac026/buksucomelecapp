@@ -1,6 +1,7 @@
 package com.example.appdevfinal.fragments;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -126,21 +127,34 @@ public class VoteFragment extends Fragment {
                 vpGroup.removeAllViews();
                 senatorsGroup.removeAllViews();
                 
+                // Group candidates by position
+                Map<String, List<Candidate>> candidatesByPosition = new HashMap<>();
+                
                 for (DocumentSnapshot document : queryDocumentSnapshots) {
                     Candidate candidate = document.toObject(Candidate.class);
                     if (candidate != null) {
-                        switch (candidate.getPosition().toLowerCase()) {
-                            case "president":
-                                addRadioButton(presidentGroup, candidate);
-                                break;
-                            case "vice president":
-                                addRadioButton(vpGroup, candidate);
-                                break;
-                            case "senator":
-                                addCheckBox(candidate.getId(), candidate.getName());
-                                break;
-                        }
+                        candidate.setId(document.getId());
+                        String position = candidate.getPosition().toLowerCase();
+                        candidatesByPosition.computeIfAbsent(position, k -> new ArrayList<>()).add(candidate);
                     }
+                }
+                
+                // Sort candidates by name within each position
+                for (List<Candidate> candidates : candidatesByPosition.values()) {
+                    candidates.sort((c1, c2) -> c1.getName().compareTo(c2.getName()));
+                }
+                
+                // Add candidates to appropriate sections
+                for (Candidate candidate : candidatesByPosition.getOrDefault("president", new ArrayList<>())) {
+                    addRadioButton(presidentGroup, candidate);
+                }
+                
+                for (Candidate candidate : candidatesByPosition.getOrDefault("vice president", new ArrayList<>())) {
+                    addRadioButton(vpGroup, candidate);
+                }
+                
+                for (Candidate candidate : candidatesByPosition.getOrDefault("senator", new ArrayList<>())) {
+                    addSenatorCheckBox(candidate);
                 }
             })
             .addOnFailureListener(e -> {
@@ -155,25 +169,34 @@ public class VoteFragment extends Fragment {
         rb.setLayoutParams(new RadioGroup.LayoutParams(
             RadioGroup.LayoutParams.MATCH_PARENT,
             RadioGroup.LayoutParams.WRAP_CONTENT));
-        rb.setText(candidate.getName());
+        rb.setText(String.format("%s\n%s", candidate.getName(), candidate.getPartyList()));
         rb.setId(View.generateViewId());
-        rb.setPadding(32, 32, 32, 32);
+        rb.setPadding(32, 24, 32, 24);
+        rb.setTag(candidate.getId());
+        rb.setButtonTintList(ColorStateList.valueOf(getResources().getColor(R.color.buksu_deep_purple)));
         group.addView(rb);
     }
 
-    private void addCheckBox(String candidateId, String candidateName) {
-        if (!isAdded()) return; // Guard against fragment not attached
+    private void addSenatorCheckBox(Candidate candidate) {
+        CheckBox checkBox = new CheckBox(requireContext());
+        checkBox.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
+        checkBox.setText(String.format("%s\n%s", candidate.getName(), candidate.getPartyList()));
+        checkBox.setId(View.generateViewId());
+        checkBox.setPadding(32, 24, 32, 24);
+        checkBox.setTag(candidate.getId());
+        checkBox.setButtonTintList(ColorStateList.valueOf(getResources().getColor(R.color.buksu_deep_purple)));
         
-        try {
-            Context context = requireContext();
-            CheckBox checkBox = new CheckBox(context);
-            checkBox.setText(candidateName);
-            checkBox.setId(View.generateViewId());
-            checkBox.setPadding(32, 32, 32, 32);
-            senatorsGroup.addView(checkBox);
-        } catch (IllegalStateException e) {
-            Log.e("VoteFragment", "Failed to add checkbox - Fragment not attached", e);
-        }
+        // Add checkbox change listener to enforce max selection
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked && validateSenators() > 12) {
+                checkBox.setChecked(false);
+                showError("You can only select up to 12 senators");
+            }
+        });
+        
+        senatorsGroup.addView(checkBox);
     }
 
     private void validateAndSubmitVote() {
@@ -251,6 +274,10 @@ public class VoteFragment extends Fragment {
         vote.put("senators", selectedSenators);
         vote.put("timestamp", new Date());
 
+        // Show loading state
+        loadingProgressBar.setVisibility(View.VISIBLE);
+        votingLayout.setVisibility(View.GONE);
+
         // Submit vote and update voter status
         db.collection("votes").add(vote)
             .addOnSuccessListener(documentReference -> {
@@ -266,10 +293,20 @@ public class VoteFragment extends Fragment {
                         }
                         showSuccess("Vote submitted successfully!");
                         clearSelections();
+                        // Show voted status immediately
+                        showVotedStatus();
                     })
-                    .addOnFailureListener(e -> showError("Error updating voter status: " + e.getMessage()));
+                    .addOnFailureListener(e -> {
+                        showError("Error updating voter status: " + e.getMessage());
+                        votingLayout.setVisibility(View.VISIBLE);
+                        loadingProgressBar.setVisibility(View.GONE);
+                    });
             })
-            .addOnFailureListener(e -> showError("Error submitting vote: " + e.getMessage()));
+            .addOnFailureListener(e -> {
+                showError("Error submitting vote: " + e.getMessage());
+                votingLayout.setVisibility(View.VISIBLE);
+                loadingProgressBar.setVisibility(View.GONE);
+            });
     }
 
     private void incrementCandidateVotes(String candidateName) {

@@ -10,8 +10,10 @@
         android:id="@+id/welcomeText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
         android:textColor="@color/buksu_purple"/>
 
     <!-- Voting Status Card - Only for Voters -->

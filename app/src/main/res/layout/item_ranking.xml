@@ -8,7 +8,7 @@
     android:layout_marginVertical="4dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
-    app:cardBackgroundColor="#80FFFFFF">
+    app:cardBackgroundColor="#F5F5F5">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,7 +26,7 @@
                 android:id="@+id/candidateNameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/buksu_deep_purple"/>
 
@@ -34,8 +34,9 @@
                 android:id="@+id/partyListText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/buksu_purple"/>
+                android:layout_marginTop="4dp"
+                android:textColor="@color/buksu_gold"
+                android:textStyle="italic"/>
         </LinearLayout>
 
         <TextView
@@ -44,6 +45,6 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/buksu_gold"/>
+            android:textColor="@color/buksu_purple"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

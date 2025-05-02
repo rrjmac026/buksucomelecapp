@@ -4,25 +4,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="4dp"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="8dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="@color/buksu_purple">
+    app:cardBackgroundColor="@color/buksu_deep_purple">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/headerText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        android:orientation="horizontal">
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/buksu_gold"
+        android:gravity="center"/>
 
-        <TextView
-            android:id="@+id/headerText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/white"
-            android:gravity="center"/>
-    </LinearLayout>
 </androidx.cardview.widget.CardView>

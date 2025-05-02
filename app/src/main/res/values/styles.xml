@@ -29,4 +29,25 @@
         <item name="hintTextColor">#FFFFFF</item>
         <item name="android:textColorHint">#FFFFFF</item>
     </style>
+
+    <style name="VoteOptionStyle">
+        <item name="android:theme">@style/VoteOptionTheme</item>
+        <item name="android:paddingVertical">12dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="VoteOptionTheme">
+        <item name="colorAccent">@color/buksu_deep_purple</item>
+        <item name="colorControlNormal">@color/buksu_deep_purple</item>
+        <item name="colorControlActivated">@color/buksu_deep_purple</item>
+    </style>
+
+    <style name="CustomRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:buttonTint">@color/buksu_deep_purple</item>
+    </style>
+
+    <style name="CustomCheckBox" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:buttonTint">@color/buksu_deep_purple</item>
+    </style>
+
 </resources>

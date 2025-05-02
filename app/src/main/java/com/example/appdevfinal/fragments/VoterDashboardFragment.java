@@ -37,12 +37,9 @@ public class VoterDashboardFragment extends Fragment {
             .get()
             .addOnSuccessListener(document -> {
                 if (document.exists()) {
-                    // Update welcome text immediately
                     String name = document.getString("name");
-                    String studentNumber = document.getString("studentNumber");
-                    welcomeText.setText(String.format("Welcome, %s\nStudent Number: %s", 
-                        name != null ? name : "Voter",
-                        studentNumber != null ? studentNumber : "Not available"));
+                    welcomeText.setText(String.format("Welcome, %s", 
+                        name != null ? name : "Voter"));
 
                     // Update voting status
                     Boolean hasVoted = document.getBoolean("hasVoted");

@@ -2,6 +2,7 @@ package com.example.appdevfinal;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,6 +37,7 @@ import android.util.Base64;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import com.google.android.material.snackbar.Snackbar;
 
 public class LoginActivity extends AppCompatActivity {
@@ -60,6 +62,15 @@ public class LoginActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         loadingIndicator = findViewById(R.id.loadingIndicator);
+        
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        mAuth = FirebaseAuth.getInstance();
         
         // Initialize Firebase
         auth = FirebaseAuth.getInstance();
@@ -90,11 +101,19 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInWithGoogle() {
-        Log.d(TAG, "Starting Google Sign In");
-        // Clear any existing sign in state first
+        // Show loading indicator
+        loadingIndicator.setVisibility(View.VISIBLE);
+        
+        // Clear any existing sign in state
         mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-            startActivityForResult(signInIntent, RC_SIGN_IN);
+            try {
+                startActivityForResult(signInIntent, RC_SIGN_IN);
+            } catch (Exception e) {
+                Log.e(TAG, "Google Sign In failed", e);
+                showError("Google Sign In failed: " + e.getMessage());
+                loadingIndicator.setVisibility(View.GONE);
+            }
         });
     }
 
@@ -117,9 +136,27 @@ public class LoginActivity extends AppCompatActivity {
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential)
-                .addOnSuccessListener(authResult -> handleLoginSuccess(authResult.getUser()))
-                .addOnFailureListener(e -> Toast.makeText(this,
-                    "Authentication failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(this, authResult -> {
+                    FirebaseUser user = authResult.getUser();
+                    if (user != null) {
+                        Map<String, Object> userData = new HashMap<>();
+                        userData.put("email", user.getEmail());
+                        userData.put("name", user.getDisplayName());
+                        userData.put("role", "voter");
+                        userData.put("lastLogin", new Date());
+
+                        db.collection("users").document(user.getUid())
+                                .set(userData, SetOptions.merge())
+                                .addOnSuccessListener(aVoid -> {
+                                    loadingIndicator.setVisibility(View.GONE);
+                                    redirectBasedOnRole("voter");
+                                })
+                                .addOnFailureListener(e -> {
+                                    loadingIndicator.setVisibility(View.GONE);
+                                    showError("Failed to update user data: " + e.getMessage());
+                                });
+                    }
+                });
     }
 
     private void handleLoginSuccess(FirebaseUser user) {
