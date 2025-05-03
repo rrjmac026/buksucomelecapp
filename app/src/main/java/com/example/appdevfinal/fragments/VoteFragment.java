@@ -186,37 +186,131 @@ public class VoteFragment extends Fragment {
     }
 
     private void addRadioButton(RadioGroup group, Candidate candidate) {
+        // Create radio button
         RadioButton rb = new RadioButton(requireContext());
-        rb.setLayoutParams(new RadioGroup.LayoutParams(
+        rb.setId(View.generateViewId());
+        rb.setTag(candidate.getId());
+        rb.setText(candidate.getName()); // Set name so we can get it later
+        rb.setVisibility(View.GONE); // Hide the actual radio button but keep it in hierarchy
+        
+        // Add radio button to RadioGroup first
+        group.addView(rb);
+
+        // Create card layout
+        com.google.android.material.card.MaterialCardView card = new com.google.android.material.card.MaterialCardView(requireContext());
+        card.setLayoutParams(new RadioGroup.LayoutParams(
             RadioGroup.LayoutParams.MATCH_PARENT,
             RadioGroup.LayoutParams.WRAP_CONTENT));
-        rb.setText(String.format("%s\n%s\n%s - %s", 
-            candidate.getName(), 
-            candidate.getPartyList(),
-            candidate.getCollege(),
-            candidate.getCourse()));
-        rb.setId(View.generateViewId());
-        rb.setPadding(32, 24, 32, 24);
-        rb.setTag(candidate.getId());
-        rb.setButtonTintList(ColorStateList.valueOf(getResources().getColor(R.color.buksu_deep_purple)));
-        group.addView(rb);
+        card.setCardElevation(4f);
+        card.setRadius(32f);
+        card.setStrokeWidth(2);
+        card.setStrokeColor(getResources().getColor(R.color.buksu_gold));
+        card.setCardBackgroundColor(getResources().getColor(android.R.color.white));
+        card.setUseCompatPadding(true);
+
+        // Create content layout
+        LinearLayout contentLayout = new LinearLayout(requireContext());
+        contentLayout.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
+        contentLayout.setOrientation(LinearLayout.VERTICAL);
+        contentLayout.setPadding(32, 24, 32, 24);
+
+        // Add candidate details
+        TextView nameText = new TextView(requireContext());
+        nameText.setText(candidate.getName());
+        nameText.setTextSize(18);
+        nameText.setTextColor(getResources().getColor(R.color.buksu_deep_purple));
+        nameText.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        TextView partyText = new TextView(requireContext());
+        partyText.setText(candidate.getPartyList());
+        partyText.setTextSize(14);
+        partyText.setTextColor(getResources().getColor(R.color.buksu_gold));
+        partyText.setTypeface(null, android.graphics.Typeface.ITALIC);
+
+        TextView detailsText = new TextView(requireContext());
+        detailsText.setText(String.format("%s - %s", candidate.getCollege(), candidate.getCourse()));
+        detailsText.setTextSize(14);
+        detailsText.setTextColor(getResources().getColor(R.color.buksu_deep_purple));
+
+        // Assemble views
+        contentLayout.addView(nameText);
+        contentLayout.addView(partyText);  
+        contentLayout.addView(detailsText);
+        card.addView(contentLayout);
+
+        // Make card reflect radio button state
+        rb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            card.setStrokeColor(getResources().getColor(isChecked ? R.color.buksu_deep_purple : R.color.buksu_gold));
+            card.setStrokeWidth(isChecked ? 4 : 2);
+        });
+
+        // Make card trigger radio button
+        card.setOnClickListener(v -> {
+            group.check(rb.getId());
+        });
+
+        // Add card to RadioGroup after the hidden radio button
+        group.addView(card);
     }
 
     private void addSenatorCheckBox(Candidate candidate) {
-        CheckBox checkBox = new CheckBox(requireContext());
-        checkBox.setLayoutParams(new LinearLayout.LayoutParams(
+        // Create card layout
+        com.google.android.material.card.MaterialCardView card = new com.google.android.material.card.MaterialCardView(requireContext());
+        card.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT));
-        checkBox.setText(String.format("%s\n%s\n%s - %s", 
-            candidate.getName(), 
-            candidate.getPartyList(),
-            candidate.getCollege(),
-            candidate.getCourse()));
+        card.setCardElevation(4f);
+        card.setRadius(32f);
+        card.setStrokeWidth(2);
+        card.setStrokeColor(getResources().getColor(R.color.buksu_gold));
+        card.setCardBackgroundColor(getResources().getColor(android.R.color.white));
+        card.setUseCompatPadding(true);
+
+        // Create inner layout
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setPadding(32, 24, 32, 24);
+
+        // Create checkbox
+        CheckBox checkBox = new CheckBox(requireContext());
+        checkBox.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
         checkBox.setId(View.generateViewId());
-        checkBox.setPadding(32, 24, 32, 24);
         checkBox.setTag(candidate.getId());
         checkBox.setButtonTintList(ColorStateList.valueOf(getResources().getColor(R.color.buksu_deep_purple)));
-        
+
+        // Create text container
+        LinearLayout textContainer = new LinearLayout(requireContext());
+        textContainer.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
+        textContainer.setOrientation(LinearLayout.VERTICAL);
+        textContainer.setPadding(32, 0, 0, 0);
+
+        // Add candidate details
+        TextView nameText = new TextView(requireContext());
+        nameText.setText(candidate.getName());
+        nameText.setTextSize(18);
+        nameText.setTextColor(getResources().getColor(R.color.buksu_deep_purple));
+        nameText.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        TextView partyText = new TextView(requireContext());
+        partyText.setText(candidate.getPartyList());
+        partyText.setTextSize(14);
+        partyText.setTextColor(getResources().getColor(R.color.buksu_gold));
+        partyText.setTypeface(null, android.graphics.Typeface.ITALIC);
+
+        TextView detailsText = new TextView(requireContext());
+        detailsText.setText(String.format("%s - %s", candidate.getCollege(), candidate.getCourse()));
+        detailsText.setTextSize(14);
+        detailsText.setTextColor(getResources().getColor(R.color.buksu_deep_purple));
+
         // Add checkbox change listener to enforce max selection
         checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked && validateSenators() > 12) {
@@ -224,8 +318,15 @@ public class VoteFragment extends Fragment {
                 showError("You can only select up to 12 senators");
             }
         });
-        
-        senatorsGroup.addView(checkBox);
+
+        // Assemble the views
+        textContainer.addView(nameText);
+        textContainer.addView(partyText);
+        textContainer.addView(detailsText);
+        layout.addView(checkBox);
+        layout.addView(textContainer);
+        card.addView(layout);
+        senatorsGroup.addView(card);
     }
 
     private void validateAndSubmitVote() {
@@ -265,11 +366,38 @@ public class VoteFragment extends Fragment {
         int count = 0;
         for (int i = 0; i < senatorsGroup.getChildCount(); i++) {
             View child = senatorsGroup.getChildAt(i);
-            if (child instanceof CheckBox && ((CheckBox) child).isChecked()) {
-                count++;
+            if (child instanceof com.google.android.material.card.MaterialCardView) {
+                View layout = ((ViewGroup) child).getChildAt(0); // Get the LinearLayout
+                if (layout instanceof LinearLayout) {
+                    View cb = ((LinearLayout) layout).getChildAt(0); // Get the CheckBox
+                    if (cb instanceof CheckBox && ((CheckBox) cb).isChecked()) {
+                        count++;
+                    }
+                }
             }
         }
         return count;
+    }
+
+    private List<String> getSelectedSenators() {
+        List<String> selectedSenators = new ArrayList<>();
+        for (int i = 0; i < senatorsGroup.getChildCount(); i++) {
+            View child = senatorsGroup.getChildAt(i);
+            if (child instanceof com.google.android.material.card.MaterialCardView) {
+                View layout = ((ViewGroup) child).getChildAt(0);
+                if (layout instanceof LinearLayout) {
+                    // Get checkbox and text container
+                    View cb = ((LinearLayout) layout).getChildAt(0);
+                    LinearLayout textContainer = (LinearLayout) ((LinearLayout) layout).getChildAt(1);
+                    TextView nameText = (TextView) textContainer.getChildAt(0);
+                    
+                    if (cb instanceof CheckBox && ((CheckBox) cb).isChecked()) {
+                        selectedSenators.add(nameText.getText().toString());
+                    }
+                }
+            }
+        }
+        return selectedSenators;
     }
 
     private void showError(String message) {
@@ -286,14 +414,7 @@ public class VoteFragment extends Fragment {
         // Get selected candidates
         RadioButton selectedPresident = presidentGroup.findViewById(presidentGroup.getCheckedRadioButtonId());
         RadioButton selectedVP = vpGroup.findViewById(vpGroup.getCheckedRadioButtonId());
-        List<String> selectedSenators = new ArrayList<>();
-        
-        for (int i = 0; i < senatorsGroup.getChildCount(); i++) {
-            View child = senatorsGroup.getChildAt(i);
-            if (child instanceof CheckBox && ((CheckBox) child).isChecked()) {
-                selectedSenators.add(((CheckBox) child).getText().toString());
-            }
-        }
+        List<String> selectedSenators = getSelectedSenators(); // Use the new helper method
 
         // Create vote document
         Map<String, Object> vote = new HashMap<>();

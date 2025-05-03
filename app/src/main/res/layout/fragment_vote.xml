@@ -98,7 +98,7 @@
                 android:textSize="18sp"
                 android:textColor="@color/buksu_deep_purple"/>
 
-            <LinearLayout
+            <com.example.appdevfinal.views.MultipleRadioGroup
                 android:id="@+id/senatorsGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
