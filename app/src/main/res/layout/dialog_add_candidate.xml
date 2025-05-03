@@ -4,18 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@drawable/dialog_background">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add Candidate"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/buksu_gold"
-        android:layout_marginBottom="16dp"
-        android:gravity="center"/>
+    android:padding="24dp">
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
