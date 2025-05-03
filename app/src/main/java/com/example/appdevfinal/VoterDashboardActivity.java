@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -19,12 +21,16 @@ import com.example.appdevfinal.fragments.VoteFragment;
 import com.example.appdevfinal.fragments.VoterDashboardFragment;
 import com.example.appdevfinal.fragments.VoterProfileFragment;
 import com.example.appdevfinal.fragments.VoterResultsFragment;
+import com.example.appdevfinal.services.BibleVerseService;
+import com.example.appdevfinal.services.BibleVerseService.BibleVerseCallback;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class VoterDashboardActivity extends AppCompatActivity 
         implements NavigationView.OnNavigationItemSelectedListener {
+    
     private DrawerLayout drawer;
+    private View bibleVerseFooter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +61,40 @@ public class VoterDashboardActivity extends AppCompatActivity
                 .commit();
             navigationView.setCheckedItem(R.id.nav_voter_dashboard);
         }
+
+        // Add Bible verse footer
+        bibleVerseFooter = getLayoutInflater().inflate(R.layout.nav_footer_bible_verse, navigationView, false);
+        navigationView.addView(bibleVerseFooter);
+        loadDailyVerse();
+    }
+
+    private void loadDailyVerse() {
+        TextView verseText = bibleVerseFooter.findViewById(R.id.bibleVerseText);
+        TextView referenceText = bibleVerseFooter.findViewById(R.id.bibleVerseReference);
+
+        BibleVerseService.startVerseUpdates(new BibleVerseService.BibleVerseCallback() {
+            @Override
+            public void onVerseReceived(String verse, String reference) {
+                runOnUiThread(() -> {
+                    verseText.setText(verse);
+                    referenceText.setText(reference);
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    verseText.setText("For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.");
+                    referenceText.setText("John 3:16");
+                });
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BibleVerseService.stopVerseUpdates();
     }
 
     @Override
