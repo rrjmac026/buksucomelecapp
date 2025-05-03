@@ -190,7 +190,11 @@ public class VoteFragment extends Fragment {
         rb.setLayoutParams(new RadioGroup.LayoutParams(
             RadioGroup.LayoutParams.MATCH_PARENT,
             RadioGroup.LayoutParams.WRAP_CONTENT));
-        rb.setText(String.format("%s\n%s", candidate.getName(), candidate.getPartyList()));
+        rb.setText(String.format("%s\n%s\n%s - %s", 
+            candidate.getName(), 
+            candidate.getPartyList(),
+            candidate.getCollege(),
+            candidate.getCourse()));
         rb.setId(View.generateViewId());
         rb.setPadding(32, 24, 32, 24);
         rb.setTag(candidate.getId());
@@ -203,7 +207,11 @@ public class VoteFragment extends Fragment {
         checkBox.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT));
-        checkBox.setText(String.format("%s\n%s", candidate.getName(), candidate.getPartyList()));
+        checkBox.setText(String.format("%s\n%s\n%s - %s", 
+            candidate.getName(), 
+            candidate.getPartyList(),
+            candidate.getCollege(),
+            candidate.getCourse()));
         checkBox.setId(View.generateViewId());
         checkBox.setPadding(32, 24, 32, 24);
         checkBox.setTag(candidate.getId());
