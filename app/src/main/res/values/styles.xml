@@ -62,4 +62,39 @@
         <item name="android:backgroundTint">@color/buksu_deep_purple</item>
     </style>
 
+    <style name="BuksuDialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="colorPrimary">@color/buksu_deep_purple</item>
+        <item name="colorAccent">@color/buksu_gold</item>
+        <item name="android:background">@android:color/white</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:textColor">@color/buksu_deep_purple</item>
+        <item name="android:textColorPrimary">@color/buksu_deep_purple</item>
+        <item name="buttonBarPositiveButtonStyle">@style/BuksuPositiveButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/BuksuNegativeButtonStyle</item>
+    </style>
+
+    <style name="BuksuPositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/buksu_gold</item>
+    </style>
+
+    <style name="BuksuNegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/buksu_deep_purple</item>
+    </style>
+
+    <style name="BuksuInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/buksu_gold</item>
+        <item name="hintTextColor">@color/buksu_gold</item>
+        <item name="android:textColorHint">@color/buksu_gold</item>
+        <item name="boxStrokeWidth">2dp</item>
+        <item name="boxBackgroundColor">#33FFFFFF</item>
+    </style>
+
+    <style name="BuksuInputLayoutStyleDropdown" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeColor">@color/buksu_gold</item>
+        <item name="hintTextColor">@color/buksu_gold</item>
+        <item name="android:textColorHint">@color/buksu_gold</item>
+        <item name="boxStrokeWidth">2dp</item>
+        <item name="boxBackgroundColor">#33FFFFFF</item>
+    </style>
+
 </resources>

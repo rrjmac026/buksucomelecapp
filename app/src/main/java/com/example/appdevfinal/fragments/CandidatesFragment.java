@@ -197,13 +197,15 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
     }
 
     private void showAddDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.BuksuDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.dialog_add_candidate, null);
 
         EditText nameInput = view.findViewById(R.id.editName);
         MaterialAutoCompleteTextView positionDropdown = view.findViewById(R.id.editPosition);
         EditText partyListInput = view.findViewById(R.id.editPartyList);
         EditText platformInput = view.findViewById(R.id.editPlatform);
+        EditText collegeInput = view.findViewById(R.id.editCollege);
+        EditText courseInput = view.findViewById(R.id.editCourse);
         setupPositionDropdown(positionDropdown);
 
         builder.setView(view)
@@ -213,6 +215,8 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
                 String position = positionDropdown.getText().toString();
                 String partyList = partyListInput.getText().toString().trim();
                 String platform = platformInput.getText().toString().trim();
+                String college = collegeInput.getText().toString().trim();
+                String course = courseInput.getText().toString().trim();
 
                 if (validateInput(name, position, partyList, platform)) {
                     Map<String, Object> candidateData = new HashMap<>();
@@ -220,6 +224,8 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
                     candidateData.put("position", position);
                     candidateData.put("partyList", partyList);
                     candidateData.put("platform", platform);
+                    candidateData.put("college", college);
+                    candidateData.put("course", course);
 
                     db.collection("candidates")
                         .add(candidateData)
@@ -235,43 +241,15 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
         builder.create().show();
     }
 
-    private boolean validateInput(String name, String position, String partyList, String platform) {
-        if (name.isEmpty() || position.isEmpty() || partyList.isEmpty() || platform.isEmpty()) {
-            showError("All fields must be filled");
-            return false;
-        }
-        return true;
-    }
-
-    private void showSuccess(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private void showError(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onCandidateClick(Candidate candidate) {
-        showCandidateDetails(candidate);
-    }
-
-    @Override
-    public void onEditClick(Candidate candidate) {
-        showEditDialog(candidate);
-    }
-
-    @Override
-    public void onDeleteClick(Candidate candidate) {
-        showDeleteConfirmation(candidate);
-    }
-
     private void showEditDialog(Candidate candidate) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_candidate, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.BuksuDialogTheme);
         EditText editName = dialogView.findViewById(R.id.editName);
         MaterialAutoCompleteTextView positionDropdown = dialogView.findViewById(R.id.editPosition);
         EditText editPartyList = dialogView.findViewById(R.id.editPartyList);
         EditText editPlatform = dialogView.findViewById(R.id.editPlatform);
+        EditText editCollege = dialogView.findViewById(R.id.editCollege);
+        EditText editCourse = dialogView.findViewById(R.id.editCourse);
         setupPositionDropdown(positionDropdown);
         positionDropdown.setText(candidate.getPosition(), false);
 
@@ -279,19 +257,30 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
         editName.setText(candidate.getName());
         editPartyList.setText(candidate.getPartyList());
         editPlatform.setText(candidate.getPlatform());
+        editCollege.setText(candidate.getCollege());
+        editCourse.setText(candidate.getCourse());
 
-        new AlertDialog.Builder(getContext())
-                .setTitle("Edit Candidate")
+        builder.setTitle("Edit Candidate")
                 .setView(dialogView)
                 .setPositiveButton("Update", (dialog, which) -> {
                     candidate.setName(editName.getText().toString());
                     candidate.setPosition(positionDropdown.getText().toString());
                     candidate.setPartyList(editPartyList.getText().toString());
                     candidate.setPlatform(editPlatform.getText().toString());
+                    candidate.setCollege(editCollege.getText().toString());
+                    candidate.setCourse(editCourse.getText().toString());
                     updateCandidate(candidate);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private boolean validateInput(String name, String position, String partyList, String platform) {
+        if (name.isEmpty() || position.isEmpty() || partyList.isEmpty() || platform.isEmpty()) {
+            showError("All fields must be filled");
+            return false;
+        }
+        return true;
     }
 
     private void loadCandidates() {
@@ -317,7 +306,9 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
                .setMessage("Name: " + candidate.getName() + "\n" +
                          "Position: " + candidate.getPosition() + "\n" +
                          "Party List: " + candidate.getPartyList() + "\n" +
-                         "Platform: " + candidate.getPlatform())
+                         "Platform: " + candidate.getPlatform() + "\n" +
+                         "College: " + candidate.getCollege() + "\n" +
+                         "Course: " + candidate.getCourse())
                .setPositiveButton("OK", null)
                .show();
     }
@@ -345,6 +336,8 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
         updates.put("position", candidate.getPosition());
         updates.put("partyList", candidate.getPartyList());
         updates.put("platform", candidate.getPlatform());
+        updates.put("college", candidate.getCollege());
+        updates.put("course", candidate.getCourse());
 
         db.collection("candidates").document(candidate.getId())
             .update(updates)
@@ -353,5 +346,32 @@ public class CandidatesFragment extends Fragment implements CandidateAdapter.OnC
                 loadCandidates();
             })
             .addOnFailureListener(e -> showError("Failed to update: " + e.getMessage()));
+    }
+
+    private void showSuccess(String message) {
+        if (getContext() != null) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showError(String message) {
+        if (getContext() != null) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onCandidateClick(Candidate candidate) {
+        showCandidateDetails(candidate);
+    }
+
+    @Override
+    public void onEditClick(Candidate candidate) {
+        showEditDialog(candidate);
+    }
+
+    @Override
+    public void onDeleteClick(Candidate candidate) {
+        showDeleteConfirmation(candidate);
     }
 }

@@ -6,6 +6,8 @@ public class Candidate {
     private String position;
     private String partyList;
     private String platform;
+    private String college;
+    private String course;
     
     public Candidate() {} // Required for Firebase
     
@@ -22,6 +24,8 @@ public class Candidate {
     public String getPosition() { return position; }
     public String getPartyList() { return partyList; }
     public String getPlatform() { return platform; }
+    public String getCollege() { return college; }
+    public String getCourse() { return course; }
     
     // Setters
     public void setId(String id) { this.id = id; }
@@ -29,4 +33,6 @@ public class Candidate {
     public void setPosition(String position) { this.position = position; }
     public void setPartyList(String partyList) { this.partyList = partyList; }
     public void setPlatform(String platform) { this.platform = platform; }
+    public void setCollege(String college) { this.college = college; }
+    public void setCourse(String course) { this.course = course; }
 }
