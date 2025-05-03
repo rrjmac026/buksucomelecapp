@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Gold Glow Effect -->
+    <item>
+        <shape>
+            <gradient
+                android:startColor="#80FFC629"
+                android:endColor="#80FFC629"
+                android:angle="180" />
+            <corners android:radius="8dp" />
+            <padding
+                android:bottom="3dp"
+                android:left="3dp"
+                android:right="3dp"
+                android:top="3dp" />
+        </shape>
+    </item>
+    <!-- Button Background -->
+    <item>
+        <shape>
+            <gradient
+                android:startColor="@color/buksu_gold"
+                android:endColor="@color/buksu_purple"
+                android:angle="180" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</layer-list>

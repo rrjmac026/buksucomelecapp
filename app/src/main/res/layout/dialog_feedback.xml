@@ -82,15 +82,4 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/submitButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Submit Feedback"
-        android:textSize="16sp"
-        android:padding="12dp"
-        app:cornerRadius="8dp"
-        android:backgroundTint="@color/buksu_deep_purple"
-        android:textColor="@color/white"/>
-
 </LinearLayout>

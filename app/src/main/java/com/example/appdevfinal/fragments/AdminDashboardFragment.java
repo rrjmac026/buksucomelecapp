@@ -20,7 +20,7 @@ public class AdminDashboardFragment extends Fragment {
     private TextView votesCountText, votersCountText, recentActivityText;
     private MaterialCardView viewResultsCard;
     private FirebaseFirestore db;
-    private ListenerRegistration votesListener;
+    private ListenerRegistration votesListener, votersListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -41,17 +41,32 @@ public class AdminDashboardFragment extends Fragment {
     }
 
     private void loadCounts() {
-        // Get total voters count
-        db.collection("users")
+        // Get total voters count with real-time listener
+        votersListener = db.collection("users")
             .whereEqualTo("role", "voter")
-            .get()
-            .addOnSuccessListener(querySnapshot -> 
-                votersCountText.setText(String.valueOf(querySnapshot.size())));
+            .addSnapshotListener((snapshots, error) -> {
+                if (error != null) {
+                    Log.e("AdminDashboard", "Listen failed.", error);
+                    return;
+                }
 
-        // Get votes count
-        db.collection("votes").get()
-            .addOnSuccessListener(querySnapshot -> 
-                votesCountText.setText(String.valueOf(querySnapshot.size())));
+                if (snapshots != null && isAdded()) {
+                    votersCountText.setText(String.valueOf(snapshots.size()));
+                }
+            });
+
+        // Get votes count with real-time listener
+        votesListener = db.collection("votes")
+            .addSnapshotListener((snapshots, error) -> {
+                if (error != null) {
+                    Log.e("AdminDashboard", "Listen failed.", error);
+                    return;
+                }
+
+                if (snapshots != null && isAdded()) {
+                    votesCountText.setText(String.valueOf(snapshots.size()));
+                }
+            });
     }
 
     private void setupRealtimeUpdates() {
@@ -107,6 +122,9 @@ public class AdminDashboardFragment extends Fragment {
         super.onDestroyView();
         if (votesListener != null) {
             votesListener.remove();
+        }
+        if (votersListener != null) {
+            votersListener.remove();
         }
     }
 }

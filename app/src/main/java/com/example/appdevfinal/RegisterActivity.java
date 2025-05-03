@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,6 +30,13 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        // Setup toolbar
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         
@@ -40,6 +48,13 @@ public class RegisterActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
 
         findViewById(R.id.registerButton).setOnClickListener(v -> validateAndRegister());
+        
+        // Add click listener for login text
+        TextView tvLogin = findViewById(R.id.tvLogin);
+        tvLogin.setOnClickListener(v -> {
+            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+            finish();
+        });
     }
 
     private void validateAndRegister() {

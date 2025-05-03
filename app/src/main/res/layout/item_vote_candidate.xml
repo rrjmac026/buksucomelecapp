@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="12dp"
+    app:strokeWidth="2dp"
+    app:strokeColor="@color/buksu_gold">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <RadioButton
+            android:id="@+id/radioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:buttonTint="@color/buksu_deep_purple"
+            android:duplicateParentState="true"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:id="@+id/candidateName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/buksu_deep_purple"/>
+
+            <TextView
+                android:id="@+id/partyListText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:textColor="@color/buksu_gold"/>
+
+            <TextView
+                android:id="@+id/collegeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/buksu_deep_purple"/>
+
+            <TextView
+                android:id="@+id/courseText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/buksu_deep_purple"/>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="8dp"/>
+
+            <TextView
+                android:id="@+id/platformText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/buksu_deep_purple"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/statusIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="top"
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            android:src="@android:drawable/ic_menu_agenda"
+            app:tint="@color/buksu_gold"/>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -30,6 +30,7 @@ public class VoterAdapter extends RecyclerView.Adapter<VoterAdapter.VoterViewHol
     @Override
     public void onBindViewHolder(@NonNull VoterViewHolder holder, int position) {
         Voter voter = voters.get(position);
+        holder.nameText.setText(voter.getName());
         holder.emailText.setText(voter.getEmail());
         holder.studentIdText.setText(voter.getStudentId());
         holder.statusText.setText(voter.hasVoted() ? "Has Voted" : "Not Voted");
@@ -46,6 +47,7 @@ public class VoterAdapter extends RecyclerView.Adapter<VoterAdapter.VoterViewHol
             if ("voter".equals(user.getRole())) {
                 Voter voter = new Voter();
                 voter.setId(user.getId());
+                voter.setName(user.getName());
                 voter.setEmail(user.getEmail());
                 voter.setStudentId(user.getStudentId());
                 voter.setRole(user.getRole());
@@ -58,15 +60,17 @@ public class VoterAdapter extends RecyclerView.Adapter<VoterAdapter.VoterViewHol
     }
 
     static class VoterViewHolder extends RecyclerView.ViewHolder {
+        TextView nameText;
         TextView emailText;
         TextView studentIdText;
         TextView statusText;
 
         VoterViewHolder(View itemView) {
             super(itemView);
-            emailText = itemView.findViewById(R.id.voterEmail);
-            studentIdText = itemView.findViewById(R.id.voterStudentId);
-            statusText = itemView.findViewById(R.id.voterStatus);
+            nameText = itemView.findViewById(R.id.voterNameText);
+            emailText = itemView.findViewById(R.id.voterEmailText);
+            studentIdText = itemView.findViewById(R.id.studentNumberText);
+            statusText = itemView.findViewById(R.id.votingStatusText);
         }
     }
 }

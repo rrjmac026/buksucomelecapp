@@ -235,6 +235,7 @@ public class ReportGenerator {
         }
         
         try {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
             String fileName = "FeedbackReport_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date()) + ".pdf";
             File pdfFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
             
@@ -255,24 +256,65 @@ public class ReportGenerator {
             Font headerFont = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD, BUKSU_DEEP_PURPLE);
             Font contentFont = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BUKSU_DEEP_PURPLE);
             
+            AtomicInteger processedFeedback = new AtomicInteger(0);
+            
             for (Map<String, Object> feedback : feedbackData) {
-                // Add styled sections
-                Paragraph section = new Paragraph();
-                section.add(new Phrase("User Feedback\n", headerFont));
-                section.add(new Phrase("User ID: " + feedback.get("userId") + "\n", contentFont));
-                section.add(new Phrase("Feedback: " + feedback.get("feedback") + "\n", contentFont));
-                section.add(new Phrase("Rating: " + feedback.get("rating") + "\n", contentFont));
-                section.add(new Phrase("Timestamp: " + feedback.get("timestamp") + "\n\n", contentFont));
+                String userId = (String) feedback.get("userId");
                 
-                // Add gold line between feedback entries
-                LineSeparator separator = new LineSeparator(1, 100, BUKSU_GOLD, Element.ALIGN_CENTER, -5);
-                section.add(separator);
-                
-                document.add(section);
+                db.collection("users").document(userId)
+                    .get()
+                    .addOnSuccessListener(userDoc -> {
+                        try {
+                            String userName = userDoc.getString("name");
+                            
+                            // Add styled sections
+                            Paragraph section = new Paragraph();
+                            section.add(new Phrase("User Feedback\n", headerFont));
+                            section.add(new Phrase("Name: " + (userName != null ? userName : "Unknown") + "\n", contentFont));
+                            section.add(new Phrase("User ID: " + userId + "\n", contentFont));
+                            section.add(new Phrase("Feedback: " + feedback.get("feedback") + "\n", contentFont));
+                            section.add(new Phrase("Rating: " + feedback.get("rating") + "\n", contentFont));
+                            section.add(new Phrase("Timestamp: " + feedback.get("timestamp") + "\n\n", contentFont));
+                            
+                            // Add gold line between feedback entries
+                            LineSeparator separator = new LineSeparator(1, 100, BUKSU_GOLD, Element.ALIGN_CENTER, -5);
+                            section.add(separator);
+                            
+                            document.add(section);
+                            
+                            if (processedFeedback.incrementAndGet() == feedbackData.size()) {
+                                document.close();
+                                Toast.makeText(context, "Report saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+                            }
+                        } catch (DocumentException e) {
+                            e.printStackTrace();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        try {
+                            // If we can't get the user name, still add the feedback with "Unknown" name
+                            Paragraph section = new Paragraph();
+                            section.add(new Phrase("User Feedback\n", headerFont));
+                            section.add(new Phrase("Name: Unknown\n", contentFont));
+                            section.add(new Phrase("User ID: " + userId + "\n", contentFont));
+                            section.add(new Phrase("Feedback: " + feedback.get("feedback") + "\n", contentFont));
+                            section.add(new Phrase("Rating: " + feedback.get("rating") + "\n", contentFont));
+                            section.add(new Phrase("Timestamp: " + feedback.get("timestamp") + "\n\n", contentFont));
+                            
+                            LineSeparator separator = new LineSeparator(1, 100, BUKSU_GOLD, Element.ALIGN_CENTER, -5);
+                            section.add(separator);
+                            
+                            document.add(section);
+                            
+                            if (processedFeedback.incrementAndGet() == feedbackData.size()) {
+                                document.close();
+                                Toast.makeText(context, "Report saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+                            }
+                        } catch (DocumentException docException) {
+                            docException.printStackTrace();
+                        }
+                    });
             }
-
-            document.close();
-            Toast.makeText(context, "Report saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(context, "Error generating report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }

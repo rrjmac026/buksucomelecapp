@@ -90,8 +90,24 @@ public class VoteFragment extends Fragment {
                 if (!isAdded()) return;
                 
                 if (documentSnapshot.exists() && Boolean.TRUE.equals(documentSnapshot.getBoolean("hasVoted"))) {
-                    showVotedStatus();
+                    // User has already voted
+                    loadingProgressBar.setVisibility(View.GONE);
+                    votingLayout.setVisibility(View.GONE);
+                    votingStatusText.setText("Thank you for Participating! You have already cast your vote.");
+                    votingStatusText.setVisibility(View.VISIBLE);
+                    alreadyVotedImage.setVisibility(View.VISIBLE);
+                    
+                    // Add Glide image loading here
+                    Glide.with(requireContext())
+                        .asGif()
+                        .load(R.drawable.peaceout)
+                        .into(alreadyVotedImage);
                 } else {
+                    // User hasn't voted yet
+                    loadingProgressBar.setVisibility(View.GONE);
+                    votingLayout.setVisibility(View.VISIBLE);
+                    votingStatusText.setVisibility(View.GONE);
+                    alreadyVotedImage.setVisibility(View.GONE);
                     loadCandidates();
                 }
             })
@@ -107,6 +123,7 @@ public class VoteFragment extends Fragment {
         
         loadingProgressBar.setVisibility(View.GONE);
         votingLayout.setVisibility(View.GONE);
+        votingStatusText.setText("Thank you for Participating! You have already cast your vote.");
         votingStatusText.setVisibility(View.VISIBLE);
         alreadyVotedImage.setVisibility(View.VISIBLE);
         
@@ -345,44 +362,63 @@ public class VoteFragment extends Fragment {
     }
 
     private void showFeedbackDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_feedback, null);
-        TextInputEditText feedbackInput = dialogView.findViewById(R.id.feedbackInput);
-        RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        
+        // Check if user has already given feedback
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                Boolean hasFeedback = documentSnapshot.getBoolean("hasFeedback");
+                if (hasFeedback != null && hasFeedback) {
+                    showError("You have already submitted feedback. Thank you!");
+                    showVotedStatus();
+                    return;
+                }
+                
+                // Show feedback dialog if user hasn't given feedback
+                View dialogView = getLayoutInflater().inflate(R.layout.dialog_feedback, null);
+                TextInputEditText feedbackInput = dialogView.findViewById(R.id.feedbackInput);
+                RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
 
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogView)
-            .setCancelable(false)
-            .setPositiveButton("Submit", (dialog, which) -> {
-                String feedback = feedbackInput.getText().toString();
-                float rating = ratingBar.getRating();
-                submitFeedback(feedback, rating);
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .setPositiveButton("Submit", (dialog, which) -> {
+                        String feedback = feedbackInput.getText().toString();
+                        float rating = ratingBar.getRating();
+                        submitFeedback(feedback, rating);
+                    });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setTextColor(getResources().getColor(R.color.white));
+                positiveButton.setBackgroundColor(getResources().getColor(R.color.buksu_deep_purple));
+                positiveButton.setPadding(40, 0, 40, 0);
             });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // Style the button
-        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        positiveButton.setTextColor(getResources().getColor(R.color.white));
-        positiveButton.setBackgroundColor(getResources().getColor(R.color.buksu_deep_purple));
-        positiveButton.setPadding(40, 0, 40, 0);
     }
 
     private void submitFeedback(String feedback, float rating) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        
         Map<String, Object> feedbackData = new HashMap<>();
         feedbackData.put("userId", userId);
         feedbackData.put("feedback", feedback);
         feedbackData.put("rating", rating);
         feedbackData.put("timestamp", new Date());
+        feedbackData.put("userEmail", FirebaseAuth.getInstance().getCurrentUser().getEmail());
 
-        db.collection("feedback")
-            .add(feedbackData)
+        db.collection("feedback").add(feedbackData)
             .addOnSuccessListener(documentReference -> {
-                showSuccess("Thank you for your feedback!");
-                showVotedStatus();
+                // Update user's feedback status
+                db.collection("users").document(userId)
+                    .update("hasFeedback", true)
+                    .addOnSuccessListener(aVoid -> {
+                        showSuccess("Thank you for your feedback!");
+                        showVotedStatus();
+                    })
+                    .addOnFailureListener(e -> showError("Error updating feedback status"));
             })
-            .addOnFailureListener(e -> 
-                showError("Failed to submit feedback: " + e.getMessage()));
+            .addOnFailureListener(e -> showError("Failed to submit feedback"));
     }
 }

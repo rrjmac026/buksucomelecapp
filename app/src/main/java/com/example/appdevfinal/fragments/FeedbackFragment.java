@@ -31,9 +31,26 @@ public class FeedbackFragment extends Fragment {
         submitButton = view.findViewById(R.id.submitButton);
         db = FirebaseFirestore.getInstance();
 
+        checkFeedbackStatus();
+        
         submitButton.setOnClickListener(v -> submitFeedback());
         
         return view;
+    }
+
+    private void checkFeedbackStatus() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                Boolean hasFeedback = documentSnapshot.getBoolean("hasFeedback");
+                if (hasFeedback != null && hasFeedback) {
+                    feedbackInput.setEnabled(false);
+                    ratingBar.setEnabled(false);
+                    submitButton.setEnabled(false);
+                    submitButton.setText("Feedback Already Submitted");
+                    Toast.makeText(getContext(), "You have already submitted feedback", Toast.LENGTH_LONG).show();
+                }
+            });
     }
 
     private void submitFeedback() {
@@ -52,12 +69,17 @@ public class FeedbackFragment extends Fragment {
         feedbackData.put("rating", rating);
         feedbackData.put("timestamp", new Date());
 
-        db.collection("feedback")
-            .add(feedbackData)
+        db.collection("feedback").add(feedbackData)
             .addOnSuccessListener(documentReference -> {
-                Toast.makeText(getContext(), "Thank you for your feedback!", Toast.LENGTH_LONG).show();
-                feedbackInput.setText("");
-                ratingBar.setRating(5);
+                db.collection("users").document(userId)
+                    .update("hasFeedback", true)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Thank you for your feedback!", Toast.LENGTH_LONG).show();
+                        feedbackInput.setEnabled(false);
+                        ratingBar.setEnabled(false);
+                        submitButton.setEnabled(false);
+                        submitButton.setText("Feedback Submitted");
+                    });
             })
             .addOnFailureListener(e -> 
                 Toast.makeText(getContext(), "Failed to submit feedback: " + e.getMessage(), 
